@@ -201,8 +201,12 @@ class GrocyActionCard extends HTMLElement {
     this.render();
   }
 
+  // FIXED: Now checks for both lowercase and Capitalized attributes
   getAttr(entityId, attrName) {
-    return this._hass.states[entityId]?.attributes?.[attrName] || [];
+    const entity = this._hass.states[entityId];
+    if (!entity || !entity.attributes) return [];
+    const Capitalized = attrName.charAt(0).toUpperCase() + attrName.slice(1);
+    return entity.attributes[attrName] || entity.attributes[Capitalized] || [];
   }
 
   relativeDate(date) {
@@ -217,9 +221,6 @@ class GrocyActionCard extends HTMLElement {
   render() {
     const chores = this.getAttr('sensor.grocy_chores', 'chores');
     const tasks = this.getAttr('sensor.grocy_tasks', 'tasks');
-    const expiring = this.getAttr('binary_sensor.grocy_expiring_products', 'expiring_products');
-    const overdue = this.getAttr('binary_sensor.grocy_overdue_products', 'overdue_products');
-    const expired = this.getAttr('binary_sensor.grocy_expired_products', 'expired_products');
     const stock = this.getAttr('sensor.grocy_stock', 'products');
     const shoppingList = this.getAttr('sensor.grocy_shopping_list', 'products');
     const overdueBatteries = this.getAttr('binary_sensor.grocy_overdue_batteries', 'overdue_batteries');
@@ -265,9 +266,9 @@ class GrocyActionCard extends HTMLElement {
       });
     });
 
-    // Process Food
+    // Process Food (FIXED: Now loops through the entire stock array)
     const foodSet = new Set();
-    [...overdue, ...expiring, ...expired].forEach(food => {
+    stock.forEach(food => {
       const id = food.product_id || food.id;
       if (this.processedItems.has('food_' + id)) return;
       if (foodSet.has(id)) return;
@@ -275,7 +276,12 @@ class GrocyActionCard extends HTMLElement {
 
       const overdueFlag = new Date(food.best_before_date) < new Date();
       const item = { id, title: getProductName(id), date: food.best_before_date, overdue: overdueFlag, type: "food" };
-      if (overdueFlag) overdueItems.push(item); else foodItems.push(item);
+      
+      if (overdueFlag) {
+        overdueItems.push(item); 
+      } else {
+        foodItems.push(item);
+      }
     });
 
     // Process Shopping List
@@ -283,9 +289,9 @@ class GrocyActionCard extends HTMLElement {
       const pId = s.product_id;
       if (this.processedItems.has('shopping_' + pId)) return;
       shoppingItems.push({
-        id: pId, // Using productId to ensure the service call works
+        id: pId,
         title: `${s.amount}x ${getProductName(pId)}`,
-        date: s.note ? `Note: ${s.note}` : null, // Hijacking the date field to show notes if they exist
+        date: s.note ? `Note: ${s.note}` : null,
         overdue: false,
         type: "shopping"
       });
@@ -303,7 +309,7 @@ class GrocyActionCard extends HTMLElement {
       `;
 
       if (!items.length) {
-        html += `<div class="empty">Nothing here ??</div>`;
+        html += `<div class="empty">Nothing here 🎉</div>`;
       }
 
       items.forEach(item => {
@@ -331,11 +337,18 @@ class GrocyActionCard extends HTMLElement {
         }
         else if (item.type === "food") {
           rowIcon = "mdi:food-apple";
-          buttons = `
-            <button class="btn open action-btn" data-action="open" data-id="${item.id}">Open</button>
-            <button class="btn action-btn" data-action="consume" data-id="${item.id}" data-spoiled="false">Consume</button>
-            <button class="btn waste action-btn" data-action="consume" data-id="${item.id}" data-spoiled="true">Waste</button>
-          `;
+          
+          // FIXED: Smart Button Logic
+          if (item.overdue) {
+            // Bad Food: Only show Waste
+            buttons = `<button class="btn waste action-btn" data-action="consume" data-id="${item.id}" data-spoiled="true">Waste</button>`;
+          } else {
+            // Good Food: Show Open and Consume
+            buttons = `
+              <button class="btn open action-btn" data-action="open" data-id="${item.id}">Open</button>
+              <button class="btn action-btn" data-action="consume" data-id="${item.id}" data-spoiled="false">Consume</button>
+            `;
+          }
         }
 
         html += `
