@@ -4,11 +4,6 @@ from __future__ import annotations
 import logging
 import warnings
 
-# --- GOD-TIER POLISH: SILENCE NOISY THIRD-PARTY LIBRARIES ---
-warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
-logging.getLogger("grocy.grocy_api_client").setLevel(logging.ERROR)
-# ------------------------------------------------------------
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -17,6 +12,11 @@ from .const import DOMAIN, LOGGER, PLATFORMS
 from .coordinator import GrocyDataUpdateCoordinator
 from .grocy_data import async_setup_endpoint_for_image_proxy
 from .services import async_setup_services, async_unload_services
+
+# --- GOD-TIER POLISH: SILENCE NOISY THIRD-PARTY LIBRARIES ---
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+logging.getLogger("grocy.grocy_api_client").setLevel(logging.ERROR)
+# ------------------------------------------------------------
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Grocy from a config entry."""
