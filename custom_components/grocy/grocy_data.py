@@ -1,12 +1,13 @@
 """Communication with Grocy API."""
-
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
 from typing import Any
 
 from aiohttp import hdrs, web
 from homeassistant.components.http import HomeAssistantView
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from grocy.grocy import Grocy
@@ -32,7 +33,6 @@ from .const import (
 )
 from .helpers import MealPlanItemWrapper, ProductWrapper, extract_base_url_and_path
 
-
 class GrocyData:
     """Handles communication and gets the data."""
 
@@ -43,15 +43,7 @@ class GrocyData:
 
     def _safe_get(self, manager: Any, **kwargs) -> Any:
         """Fallback adapter for undocumented endpoints like chores/batteries."""
-        probe_methods = (
-            "current",
-            "items",
-            "all",
-            "get_all",
-            "list",
-            "tasks",
-            "chores",
-        )
+        probe_methods = ("current", "items", "all", "get_all", "list", "tasks", "chores")
         for method_name in probe_methods:
             if hasattr(manager, method_name):
                 method = getattr(manager, method_name)
@@ -87,20 +79,34 @@ class GrocyData:
             ATTR_BATTERIES: self.async_update_batteries,
             ATTR_OVERDUE_BATTERIES: self.async_update_overdue_batteries,
         }
-
+        
         if entity_key in update_methods:
-            return await update_methods[entity_key]()
+            # --- THE BULLETPROOF API WRAPPER ---
+            try:
+                return await update_methods[entity_key]()
+            except Exception as error:
+                err_str = str(error).lower()
+                # Catch the NoneType / mapping crash from empty server responses
+                if "nonetype" in err_str or "mapping" in err_str or "non-json" in err_str:
+                    LOGGER.warning(
+                        "Grocy API hiccup: Received empty data for %s. Suppressing crash and returning empty list.", 
+                        entity_key
+                    )
+                    return []
+                # If it's a real network error (like the server being offline), let HA know
+                raise
 
     # --- EXACT MAPPINGS FROM SOURCE CODE ---
 
     async def async_update_stock(self) -> list[ProductWrapper]:
         def wrapper() -> list[ProductWrapper]:
             return [ProductWrapper(item) for item in self.api.stock.current()]
-
         return await self.hass.async_add_executor_job(wrapper)
 
     async def async_update_tasks(self) -> Any:
-        return await self.hass.async_add_executor_job(lambda: self.api.tasks.list())
+        return await self.hass.async_add_executor_job(
+            lambda: self.api.tasks.list()
+        )
 
     async def async_update_overdue_tasks(self) -> Any:
         and_query_filter = [
@@ -147,9 +153,7 @@ class GrocyData:
     async def async_update_overdue_chores(self) -> Any:
         query_filter = [f"next_estimated_execution_time<{datetime.now()}"]
         return await self.hass.async_add_executor_job(
-            lambda: self._safe_get(
-                self.api.chores, get_details=True, query_filters=query_filter
-            )
+            lambda: self._safe_get(self.api.chores, get_details=True, query_filters=query_filter)
         )
 
     async def async_get_config(self) -> Any:
@@ -157,16 +161,13 @@ class GrocyData:
             try:
                 config = self.api.system.config()
                 # If it successfully grabbed the config AND it has features, use it!
-                if config and hasattr(config, "enabled_features"):
+                if config and hasattr(config, 'enabled_features'):
                     return config
             except Exception as err:
                 LOGGER.warning("Grocy config check exception: %s", err)
-
+                
             # If the library returned 'None' (due to the non-JSON bug) or crashed, use the fallback!
-            LOGGER.warning(
-                "Grocy config returned empty. Assuming all features are enabled."
-            )
-
+            LOGGER.warning("Grocy config returned empty. Assuming all features are enabled.")
             class FallbackConfig:
                 enabled_features = [
                     "FEATURE_FLAG_STOCK",
@@ -174,11 +175,10 @@ class GrocyData:
                     "FEATURE_FLAG_TASKS",
                     "FEATURE_FLAG_CHORES",
                     "FEATURE_FLAG_RECIPES",
-                    "FEATURE_FLAG_BATTERIES",
+                    "FEATURE_FLAG_BATTERIES"
                 ]
-
             return FallbackConfig()
-
+            
         return await self.hass.async_add_executor_job(wrapper)
 
     async def async_update_meal_plan(self) -> list[MealPlanItemWrapper]:
@@ -186,19 +186,9 @@ class GrocyData:
         query_filter = [f"day>{yesterday.date()}"]
 
         def wrapper() -> list[MealPlanItemWrapper]:
-            meal_plan = self._safe_get(
-                self.api.meal_plan, get_details=True, query_filters=query_filter
-            )
+            meal_plan = self._safe_get(self.api.meal_plan, get_details=True, query_filters=query_filter)
             plan = [MealPlanItemWrapper(item) for item in meal_plan]
-            return sorted(
-                plan,
-                key=lambda item: (
-                    getattr(item.meal_plan, "day", datetime.min)
-                    if hasattr(item, "meal_plan")
-                    else datetime.min
-                ),
-            )
-
+            return sorted(plan, key=lambda item: getattr(item.meal_plan, "day", datetime.min) if hasattr(item, "meal_plan") else datetime.min)
         return await self.hass.async_add_executor_job(wrapper)
 
     async def async_update_batteries(self) -> list[Any]:
@@ -209,9 +199,7 @@ class GrocyData:
     async def async_update_overdue_batteries(self) -> list[Any]:
         filter_query = [f"next_estimated_charge_time<{datetime.now()}"]
         return await self.hass.async_add_executor_job(
-            lambda: self._safe_get(
-                self.api.batteries, query_filters=filter_query, get_details=True
-            )
+            lambda: self._safe_get(self.api.batteries, query_filters=filter_query, get_details=True)
         )
 
 
@@ -223,7 +211,7 @@ async def async_setup_endpoint_for_image_proxy(
     grocy_base_url, grocy_path = extract_base_url_and_path(url)
     api_key = config_entry_data.get(CONF_API_KEY, "")
     port_number = config_entry_data.get(CONF_PORT, 9192)
-
+    
     grocy_full_url = f"{grocy_base_url}:{port_number}"
     if grocy_path:
         grocy_full_url += f"/{grocy_path}"
@@ -242,9 +230,7 @@ class GrocyPictureView(HomeAssistantView):
         self._base_url = base_url
         self._api_key = api_key
 
-    async def get(
-        self, request: web.Request, picture_type: str, filename: str
-    ) -> web.Response:
+    async def get(self, request: web.Request, picture_type: str, filename: str) -> web.Response:
         width = request.query.get("width", "400")
         url = f"{self._base_url}/api/files/{picture_type}/{filename}?force_serve_as=picture&best_fit_width={width}"
         headers = {"GROCY-API-KEY": self._api_key, "accept": "*/*"}
