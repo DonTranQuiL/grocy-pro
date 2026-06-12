@@ -1,8 +1,12 @@
 {
   "domain": "grocy",
   "name": "Grocy",
-  "after_dependencies": ["http"],
-  "codeowners": ["@DonTranquiL"],
+  "after_dependencies": [
+    "http"
+  ],
+  "codeowners": [
+    "@DonTranquiL"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/DonTranQuiL/grocy",
