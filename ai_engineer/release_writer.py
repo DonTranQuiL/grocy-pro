@@ -16,7 +16,7 @@ if not api_key:
     exit(0)
 
 client = OpenAI(
-    base_url="[https://openrouter.ai/api/v1](https://openrouter.ai/api/v1)",
+    base_url="https://openrouter.ai/api/v1",
     api_key=api_key,
 )
 
@@ -30,12 +30,14 @@ We are dropping a brand new release, and your job is to write the official GitHu
 Here are the commit titles and extended descriptions since the last release:
 {changelog}
 
-1. Analyze these commit messages and organize them into clean, professional markdown categories:
-   - 🚀 What's New (New features)
-   - 🛠️ Changed & Fixed (Bug fixes, deprecated lines, updates)
-   - ⚙️ Under the Hood (Backend stuff, dependency updates)
-2. Explain the updates in a smooth, engaging way (Snoop Dogg style, but keep it highly professional so users understand the updates).
-3. ONLY output the raw Markdown text. DO NOT wrap your response in triple backticks ({BACKTICKS}) or a code block. Just output the raw text directly.
+CRITICAL INSTRUCTIONS:
+1. Even if there is only ONE tiny commit (e.g., "Enhance README"), you must expand it into a full, hype, professional release note.
+2. Organize the markdown clearly with these categories (use them even if you have to creatively explain the small changes):
+   - 🚀 What's New & Fly (The main features or updates)
+   - 🛠️ Changed & Fixed (Bug fixes, tweaks)
+   - ⚙️ Under the Hood (Backend, docs, chores)
+3. Explain the updates in a smooth, engaging way (Snoop Dogg style, but keep it highly professional).
+4. ONLY output the raw Markdown text. DO NOT wrap your response in triple backticks ({BACKTICKS}) or a code block. Just output the raw text directly.
 """
 
 try:
@@ -55,7 +57,7 @@ try:
     release_id = os.getenv("RELEASE_ID")
     token = os.getenv("GITHUB_TOKEN")
 
-    url = f"[https://api.github.com/repos/](https://api.github.com/repos/){repo}/releases/{release_id}"
+    url = f"https://api.github.com/repos/{repo}/releases/{release_id}"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json",
