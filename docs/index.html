@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrocyPro: The God-Tier Home Assistant Overhaul</title>
+    
+    <!-- Fonts & Core Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Three.js CDN for Interactive 3D Particles Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#0284c7', // Sky Blue
+                            light: '#38bdf8',
+                            dark: '#0369a1',
+                            emerald: '#10b981',
+                            darkemerald: '#047857',
+                            purple: '#8b5cf6',
+                            darkpurple: '#6d28d9',
+                            darker: '#090d16'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #050811;
+            overflow-x: hidden;
+        }
+        
+        /* Premium Glowing Glassmorphic Elements */
+        .glass-card {
+            background: rgba(10, 15, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-interactive {
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card-interactive:hover {
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(3, 105, 161, 0.15);
+        }
+
+        /* Ambient Glow Shadows */
+        .glow-box-sky {
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+        }
+
+        .glow-box-emerald {
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
+        }
+
+        /* Sparkle Animation for Action Feedback */
+        .sparkle {
+            position: absolute;
+            background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 1;
+            animation: explode 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(calc(-50% + var(--mx)), calc(-50% + var(--my))) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Custom Sliding Toasts animation */
+        @keyframes slideInUp {
+            0% {
+                transform: translateY(100px) scale(0.9);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-enter {
+            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Technical Line grid styling */
+        .grid-cyber {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="text-gray-100 font-sans tracking-tight antialiased selection:bg-brand selection:text-white">
+
+    <!-- 3D Background Canvas -->
+    <div id="webgl-background" class="fixed inset-0 z-0 pointer-events-none opacity-60"></div>
+
+    <!-- Background decorative glows -->
+    <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-dark/20 blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-brand-purple/10 blur-[120px] pointer-events-none"></div>
+
+    <!-- Nav Header -->
+    <header id="navbar" class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050811]/70 backdrop-blur-md transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-dark to-brand-light flex items-center justify-center shadow-lg shadow-brand/20">
+                    <i class="fa-solid fa-cart-shopping text-white text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">GROCY<span class="text-brand-light">PRO</span></span>
+                    <span class="text-[9px] block text-brand-light font-mono -mt-1 tracking-widest uppercase">v2.0.0 Stable</span>
+                </div>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-6 text-xs font-semibold text-gray-400">
+                <a href="#simulator" class="hover:text-white transition-colors">Interactive Demo</a>
+                <a href="#comparison" class="hover:text-white transition-colors">Before & After</a>
+                <a href="#features" class="hover:text-white transition-colors">Core Features</a>
+                <a href="#installation" class="hover:text-white transition-colors">Installation</a>
+                <a href="#automations" class="hover:text-white transition-colors">YAML Templates</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <a href="https://github.com/DonTranQuiL/grocy-pro" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-xs font-bold transition-all flex items-center gap-2">
+                    <i class="fa-brands fa-github text-sm"></i> GitHub Repository
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Hero Title Showcase -->
+        <section class="text-center max-w-4xl mx-auto mb-20">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand/20 bg-brand/5 text-brand-light text-xs font-bold mb-6 glow-box-sky">
+                <span class="w-2 h-2 rounded-full bg-brand-light animate-pulse"></span>
+                GrocyPro v2.0.0 Stable Rewrite
+            </div>
+            
+            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-none mb-6">
+                The God-Tier Overhaul for <br>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-light to-brand-purple">Home Assistant Inventory</span>
+            </h1>
+            
+            <p class="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed mb-8">
+                An ultra-responsive, zero-latency, AI-powered inventory engine and interactive Lovelace dashboard component. Free your smart home system from outdated blocking cycles.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="#simulator" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-dark hover:from-brand-light hover:to-brand text-xs font-bold transition-all shadow-lg shadow-brand/20 flex items-center gap-2">
+                    Try Dashboard Simulator <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="#installation" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-xs font-bold transition-all">
+                    Installation Steps
+                </a>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE DASHBOARD SECTION -->
+        <section id="simulator" class="mb-24 scroll-mt-20">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Experience "Optimistic UI" Live</h2>
+                <p class="text-xs text-gray-400 mt-2">
+                    Interact directly with this virtual dashboard card. Toggle engine modes to observe the speed difference.
+                </p>
+            </div>
+
+            <!-- Dashboard Frame Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Lovelace Card Panel (Left side) -->
+                <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-white/10 glow-box-sky relative overflow-hidden">
+                    
+                    <!-- Card Header -->
+                    <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="p-1.5 rounded-lg bg-brand/10 text-brand-light text-xs"><i class="fa-solid fa-sliders"></i></span>
+                            <div>
+                                <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">GROCY COMMAND CENTER</h4>
+                                <p class="text-[9px] text-gray-500 font-mono">LOVELACE CUSTOM COMPONENT</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistics Mini Grid -->
+                        <div class="flex gap-4">
+                            <div class="text-right">
+                                <span class="text-[10px] text-gray-500 block uppercase font-bold">In Stock</span>
+                                <span id="badge-stock" class="text-xs font-mono font-bold text-brand-light">0</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-gray-500 block uppercase font-bold">Alerts</span>
+                                <span id="badge-expired" class="text-xs font-mono font-bold text-amber-400">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Engine Mode Selectors -->
+                    <div class="mb-6 p-4 rounded-xl bg-[#090d16] border border-white/5">
+                        <span class="text-[10px] text-gray-400 block font-bold mb-2 uppercase tracking-widest">Select Intercept Engine Mode</span>
+                        <div class="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-lg">
+                            <button id="mode-optimistic" class="py-2 text-xs font-bold rounded-md transition-all bg-brand text-white shadow-md shadow-brand/20" onclick="setSimMode('optimistic')">
+                                ⚡ Optimistic UI Engine
+                            </button>
+                            <button id="mode-legacy" class="py-2 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all" onclick="setSimMode('legacy')">
+                                🐌 Legacy Polling Sync
+                            </button>
+                        </div>
+                        <p id="mode-desc" class="text-[10px] text-gray-400 mt-3 leading-normal font-mono">
+                            <strong>⚡ Optimistic Mode:</strong> Click any action and it takes place instantly. UI components update without waiting for database confirmation responses.
+                        </p>
+                    </div>
+
+                    <!-- Sub-Grids: Pantry Stock & Chores -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        <!-- Pantry Column -->
+                        <div>
+                            <h5 class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-2 flex items-center justify-between">
+                                <span>Pantry Tracker</span>
+                                <span class="px-1.5 py-0.5 rounded bg-brand/10 text-brand-light text-[8px]">Auto-sort</span>
+                            </h5>
+                            
+                            <div id="pantry-container" class="space-y-2">
+                                <!-- Dynamic Render -->
+                            </div>
+                        </div>
+
+                        <!-- Chores Column -->
+                        <div>
+                            <h5 class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-2 flex items-center justify-between">
+                                <span>Household Chores</span>
+                                <span class="px-1.5 py-0.5 rounded bg-brand-emerald/10 text-brand-emerald text-[8px]">Actionable</span>
+                            </h5>
+                            
+                            <div id="chores-container" class="space-y-2">
+                                <!-- Dynamic Render -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Hardware Interaction Simulators -->
+                    <div class="mt-6 border-t border-white/5 pt-4">
+                        <span class="text-[10px] text-gray-400 block font-bold mb-3 uppercase tracking-widest">Simulate Hardware Interactions</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="p-2.5 rounded-lg border border-brand/20 hover:border-brand bg-brand/5 hover:bg-brand/10 text-xs font-bold text-brand-light transition-all flex items-center justify-center gap-1.5" onclick="triggerNFC('dog_food', 'nfc-01')">
+                                <i class="fa-solid fa-tag"></i> Tap NFC tag
+                            </button>
+                            <button class="p-2.5 rounded-lg border border-brand-emerald/20 hover:border-brand-emerald bg-brand-emerald/5 hover:bg-brand-emerald/10 text-xs font-bold text-brand-emerald transition-all flex items-center justify-center gap-1.5" onclick="runAIReceiptVision()">
+                                <i class="fa-solid fa-receipt"></i> Scan Receipt
+                            </button>
+                            <button class="p-2.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5" onclick="resetSimulationData()">
+                                <i class="fa-solid fa-rotate-right"></i> Reset Simulation
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Real-time Terminal Log (Right side) -->
+                <div class="lg:col-span-5 flex flex-col h-full self-stretch">
+                    <div class="glass-card rounded-2xl border border-white/10 overflow-hidden flex flex-col h-full bg-[#04070e] glow-box-emerald flex-1">
+                        
+                        <!-- Terminal Bar -->
+                        <div class="px-4 py-2.5 border-b border-white/5 flex items-center justify-between bg-brand-darker/50">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
+                                <span class="text-[10px] text-gray-500 font-mono ml-2">Home Assistant Dev Log Console</span>
+                            </div>
+                            <div class="w-2 h-2 rounded-full bg-brand-emerald animate-ping"></div>
+                        </div>
+
+                        <!-- Console Output body -->
+                        <div id="sim-terminal" class="p-4 font-mono text-[10px] leading-relaxed text-gray-300 overflow-y-auto h-[350px] flex-1">
+                            <div><span class="text-brand-light">[SYSTEM INITIALIZING]</span> Safe service coordinators and DB pools online.</div>
+                            <div><span class="text-brand-emerald">[READY]</span> Waiting for interaction execution calls...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- BEFORE & AFTER SECTION -->
+        <section id="comparison" class="mb-24 scroll-mt-20">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">The Overhaul Realized</h2>
+                <p class="text-xs text-gray-400 mt-2">
+                    Standard integrations fail under high-traffic actions. Look at what happens when synchronization stalls.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                
+                <!-- Legacy Card -->
+                <div class="glass-card rounded-2xl border border-red-500/10 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold">THE LEGACY STATE</span>
+                            <span class="text-xs text-gray-500">Unpatched execution handlers</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-2">Uncaught Timeout and Asset Errors</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6">
+                            Frequent network requests on old integrations caused constant blocking calls, leading to broken assets, missing state metrics, and broken visual panels.
+                        </p>
+                    </div>
+
+                    <!-- Verbatim reference to verification image -->
+                    <div class="rounded-xl border border-white/5 bg-black/40 overflow-hidden relative group p-4">
+                        <img src="{A13FF018-D6E8-4187-AB40-A0D0B16D42DF}.png" alt="Broken Legacy Integration Example" class="w-full h-auto object-contain rounded border border-white/10 group-hover:scale-[1.01] transition-all" onerror="this.src='https://placehold.co/800x120/0a0f1d/ff3333?text=Broken+Assets+and+Unstable+API+Connection+State';">
+                        <div class="absolute inset-0 bg-red-950/20 pointer-events-none flex items-center justify-center">
+                            <span class="text-[10px] font-mono text-red-400 bg-red-950/80 px-2.5 py-1 rounded border border-red-500/30">Asset Timeout Stack Trace Error</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overhauled Card -->
+                <div class="glass-card rounded-2xl border border-brand-emerald/10 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-2 py-0.5 rounded bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-[10px] font-bold">THE NEW OVERHAUL</span>
+                            <span class="text-xs text-gray-500">Bulletproof UI Pipeline</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-2">Optimistic Sync & AI Automation</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6">
+                            The patched Python platform introduces non-blocking transaction states, allowing safe, lightning-fast UI modifications and background REST queries without lockouts.
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl border border-brand-emerald/15 bg-gradient-to-br from-[#09151e] to-[#040811] overflow-hidden p-6 flex flex-col justify-center items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-brand-emerald text-4xl animate-bounce"></i>
+                        <div class="text-center">
+                            <span class="text-xs text-white font-bold block">100% Non-Blocking Sync</span>
+                            <span class="text-[10px] text-gray-500 block font-mono">0ms Main Thread Latency Lockups</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CORE FEATURES SECTION -->
+        <section id="features" class="mb-24 scroll-mt-20">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Overhaul Capabilities</h2>
+                <p class="text-xs text-gray-400 mt-2">
+                    Every piece of code has been completely updated to achieve high performance.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Feature 1 -->
+                <div class="glass-card glass-card-interactive rounded-2xl p-6 border border-white/5">
+                    <span class="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand-light text-base mb-4">
+                        <i class="fa-solid fa-bolt"></i>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-white mb-2">Optimistic Actions</h4>
+                    <p class="text-xs text-gray-400 leading-normal">
+                        Deducts stock metrics and completes tasks in real-time, removing visual blocks before database transactions complete.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card glass-card-interactive rounded-2xl p-6 border border-white/5">
+                    <span class="w-10 h-10 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald text-base mb-4">
+                        <i class="fa-solid fa-robot"></i>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-white mb-2">AI Receipt Vision</h4>
+                    <p class="text-xs text-gray-400 leading-normal">
+                        Fuzzy match strings extracted via large language models to inventory entity keys automatically.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card glass-card-interactive rounded-2xl p-6 border border-white/5">
+                    <span class="w-10 h-10 rounded-xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purple text-base mb-4">
+                        <i class="fa-solid fa-nfc-directional"></i>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-white mb-2">Native NFC Triggers</h4>
+                    <p class="text-xs text-gray-400 leading-normal">
+                        Execute automatic stock reduction states concurrently using physical sticker interfaces on pantry bins.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- INSTALLATION SECTION -->
+        <section id="installation" class="mb-24 scroll-mt-20">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Quick Installation Guide</h2>
+                <p class="text-xs text-gray-400 mt-2">
+                    Follow these step-by-step procedures to fully integrate the new dashboard elements.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                
+                <!-- Part 1 -->
+                <div class="glass-card rounded-2xl p-6 border border-white/5">
+                    <div class="flex items-center gap-3 border-b border-white/5 pb-4 mb-4">
+                        <span class="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 text-brand-light font-extrabold text-xs flex items-center justify-center">1</span>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Part 1: Backend Setup</h4>
+                            <p class="text-[9px] text-gray-500 uppercase font-mono">Home Assistant Custom Integrations</p>
+                        </div>
+                    </div>
+
+                    <ol class="space-y-4 text-xs text-gray-300">
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-light font-mono">•</span>
+                            <span>Open your <strong>HACS Interface</strong> in the side navigation panel.</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-light font-mono">•</span>
+                            <div>
+                                <span>Click the 3 dots menu in the upper right, choose <strong>Custom Repositories</strong>, and add:</span>
+                                <div class="mt-2 flex items-center gap-2 bg-[#090d16] border border-white/5 p-2 rounded-lg font-mono text-[10px] text-brand-light">
+                                    <span class="flex-1 truncate select-all">https://github.com/DonTranQuiL/Grocy</span>
+                                    <button class="px-2 py-0.5 rounded bg-brand/10 hover:bg-brand text-white border border-brand/20 transition-all text-[8px]" onclick="copySnippet('hacs-repo')">Copy URL</button>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-light font-mono">•</span>
+                            <span>Set the dropdown classification selector to **Integration** and click install.</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="text-red-400 font-mono">⚠️</span>
+                            <span class="text-red-300 font-bold">Restart your Home Assistant instance to load the updated Python structures.</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Part 2 -->
+                <div class="glass-card rounded-2xl p-6 border border-white/5">
+                    <div class="flex items-center gap-3 border-b border-white/5 pb-4 mb-4">
+                        <span class="w-8 h-8 rounded-full bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald font-extrabold text-xs flex items-center justify-center">2</span>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Part 2: Lovelace Configuration</h4>
+                            <p class="text-[9px] text-gray-500 uppercase font-mono">Dashboard JavaScript module deployment</p>
+                        </div>
+                    </div>
+
+                    <ol class="space-y-4 text-xs text-gray-300">
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-emerald font-mono">•</span>
+                            <div>
+                                <span>Copy your custom `grocy-action-card.js` script to the HA config directory:</span>
+                                <div class="mt-2 flex items-center gap-2 bg-[#090d16] border border-white/5 p-2 rounded-lg font-mono text-[10px] text-brand-emerald">
+                                    <span class="flex-1 truncate select-all">/config/www/grocy-action-card.js</span>
+                                    <button class="px-2 py-0.5 rounded bg-brand-emerald/10 hover:bg-brand-emerald text-white border border-brand-emerald/20 transition-all text-[8px]" onclick="copySnippet('card-path')">Copy Path</button>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-emerald font-mono">•</span>
+                            <span>Navigate to <strong>Settings > Dashboards > Resources</strong> in HA.</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-emerald font-mono">•</span>
+                            <span>Create a new Resource element, configure the locator field as `/local/grocy-action-card.js`, and label it as a **JavaScript Module**.</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <span class="text-brand-emerald font-mono">•</span>
+                            <span>Flush browser storage cache (`Ctrl + Shift + R`) to update standard asset pointers.</span>
+                        </li>
+                    </ol>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- YAML TEMPLATES & AUTOMATIONS SECTION -->
+        <section id="automations" class="mb-24 scroll-mt-20">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Dashboard Integration Blueprints</h2>
+                <p class="text-xs text-gray-400 mt-2">
+                    Copy and deploy these production-ready configurations into your Home Assistant installation.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Lovelace Card Config -->
+                <div class="glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
+                            <span class="text-xs font-extrabold text-white font-mono flex items-center gap-1.5"><i class="fa-solid fa-table-columns text-brand-light"></i> LOVELACE YAML</span>
+                            <button class="px-2 py-1 rounded bg-white/5 hover:bg-brand text-gray-300 hover:text-white transition-all text-[9px] font-bold" onclick="copyCodeBlock('code-card-config')">Copy Config</button>
+                        </div>
+                        <pre id="code-card-config" class="text-[9px] text-gray-300 font-mono bg-[#04070e] p-3 rounded-xl overflow-x-auto border border-white/5 leading-normal">
+type: custom:grocy-action-card
+layout_options:
+  grid_columns: 3</pre>
+                    </div>
+                </div>
+
+                <!-- NFC Automation Template -->
+                <div class="glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
+                            <span class="text-xs font-extrabold text-white font-mono flex items-center gap-1.5"><i class="fa-solid fa-nfc-directional text-brand-purple"></i> NFC SMART PANTRY</span>
+                            <button class="px-2 py-1 rounded bg-white/5 hover:bg-brand-purple text-gray-300 hover:text-white transition-all text-[9px] font-bold" onclick="copyCodeBlock('code-nfc-config')">Copy Config</button>
+                        </div>
+                        <pre id="code-nfc-config" class="text-[9px] text-gray-300 font-mono bg-[#04070e] p-3 rounded-xl overflow-x-auto border border-white/5 leading-normal">
+alias: "Grocy: NFC Tap - Feed Dogs"
+mode: single
+trigger:
+  - platform: tag
+    tag_id: "YOUR_NFC_TAG_HEX"
+action:
+  - service: grocy.consume_product_from_stock
+    data:
+      product_id: 42 
+      amount: 1
+      transaction_type: CONSUME
+  - service: grocy.execute_chore
+    data:
+      chore_id: 15</pre>
+                    </div>
+                </div>
+
+                <!-- AI Vision Blueprint -->
+                <div class="glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
+                            <span class="text-xs font-extrabold text-white font-mono flex items-center gap-1.5"><i class="fa-solid fa-microchip-ai text-brand-emerald"></i> AI SCANNER SCRIPT</span>
+                            <button class="px-2 py-1 rounded bg-white/5 hover:bg-brand-emerald text-gray-300 hover:text-white transition-all text-[9px] font-bold" onclick="copyCodeBlock('code-ai-config')">Copy Config</button>
+                        </div>
+                        <pre id="code-ai-config" class="text-[9px] text-gray-300 font-mono bg-[#04070e] p-3 rounded-xl overflow-x-auto border border-white/5 leading-normal">
+alias: "Grocy: Process with AI"
+icon: mdi:receipt-text-scan
+mode: single
+sequence:
+  - action: google_generative_ai_conversation.generate_content
+    data:
+      prompt: >
+        Read this grocery receipt. Extract the items purchased, their quantities, and the prices. 
+        Return ONLY a raw, valid JSON object matching this exact schema:
+        {"items": [{"name": "Item Name", "amount": 1.0, "price": "2.99"}]}
+        Do not include markdown blocks, backticks, or conversational text. Return ONLY the JSON.
+      image_entity_id: image.receipt_scanner
+    response_variable: ai_response
+  - action: grocy.add_products_by_name
+    data: "{{ ai_response.text | from_json }}"</pre>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-[#03050b] py-12 relative z-10 text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-gradient-to-tr from-brand-dark to-brand-light flex items-center justify-center">
+                    <i class="fa-solid fa-cart-shopping text-white text-[10px]"></i>
+                </div>
+                <span class="text-xs font-extrabold text-white">GROCY<span class="text-brand-light">PRO</span></span>
+            </div>
+            
+            <p>© 2026 GrocyPro Overhaul Project. Maintained by @DonTranQuiL. Released under the MIT License.</p>
+            
+            <div class="flex items-center gap-4">
+                <a href="https://ko-fi.com/DonTranQuiL" target="_blank" class="hover:text-white transition-colors text-yellow-400 font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-mug-hot"></i> Donate
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Absolute Toast container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- Application Logic Script -->
+    <script>
+        // Core Database Registers for Lovelace Simulator
+        let currentEngineMode = 'optimistic'; // 'optimistic' or 'legacy'
+        let pantryItems = [
+            { id: 'item-milk', name: 'Fresh Whole Milk', details: 'Expires in 2 days', type: 'expiring', count: 1, base: 1, metric: 'L' },
+            { id: 'item-avocado', name: 'Avocado Bag', details: 'Expires today!', type: 'expired', count: 1, base: 1, metric: 'qty' },
+            { id: 'item-yogurt', name: 'Greek Yogurt Pack', details: 'Expires in 5 days', type: 'normal', count: 4, base: 4, metric: 'qty' },
+            { id: 'item-eggs', name: 'Organic Dozen Eggs', details: 'Expires in 12 days', type: 'normal', count: 1, base: 1, metric: 'qty' }
+        ];
+
+        let choreItems = [
+            { id: 'chore-dog', name: 'Feed the Dogs', schedule: 'Morning schedule', completed: false, baseId: 12 },
+            { id: 'chore-trash', name: 'Take out Trash Bin', schedule: 'Weekly schedule', completed: false, baseId: 15 }
+        ];
+
+        // Renders active lists inside interactive dashboard mock frame
+        function updateDashboardUI() {
+            const pantryContainer = document.getElementById('pantry-container');
+            const choresContainer = document.getElementById('chores-container');
+            
+            if (!pantryContainer || !choresContainer) return; // Prevent DOM initialization crashes
+
+            // Calculate active badge limits
+            const expiredCount = pantryItems.filter(i => i.type === 'expired' || i.type === 'expiring').length + choreItems.filter(c => !c.completed).length;
+            const activeStockCount = pantryItems.reduce((acc, curr) => acc + curr.count, 0);
+
+            document.getElementById('badge-expired').innerText = expiredCount;
+            document.getElementById('badge-stock').innerText = activeStockCount;
+
+            // Render Pantry Items
+            pantryContainer.innerHTML = '';
+            if (pantryItems.length === 0) {
+                pantryContainer.innerHTML = `<div class="p-6 text-center text-gray-500 text-xs font-mono border border-dashed border-white/5 rounded-xl">Pantry stock empty. Trigger scan receipt image to restock.</div>`;
+            } else {
+                pantryItems.forEach(item => {
+                    let borderClass = 'border-white/5 bg-white/[0.01]';
+                    let textAccent = 'text-gray-400';
+                    if (item.type === 'expired') {
+                        borderClass = 'border-red-500/20 bg-red-950/5';
+                        textAccent = 'text-red-400 font-semibold';
+                    } else if (item.type === 'expiring') {
+                        borderClass = 'border-amber-500/20 bg-amber-950/5';
+                        textAccent = 'text-amber-400';
+                    }
+
+                    pantryContainer.innerHTML += `
+                        <div id="${item.id}" class="p-3 rounded-xl border ${borderClass} flex items-center justify-between transition-all duration-300 relative overflow-hidden group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 text-xs font-mono">
+                                    ${item.count}${item.metric}
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-white leading-tight">${item.name}</h5>
+                                    <span class="text-[10px] ${textAccent} leading-normal block">${item.details}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <button class="px-2 py-1 rounded bg-brand/10 hover:bg-brand text-brand-light hover:text-white border border-brand/20 text-[10px] font-bold transition-all flex items-center gap-1" onclick="consumeProduct('${item.id}', event)">
+                                    <span class="spinner hidden mr-1"><i class="fa-solid fa-circle-notch animate-spin"></i></span>
+                                    Consume
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Chore Items
+            choresContainer.innerHTML = '';
+            const activeChores = choreItems.filter(c => !c.completed);
+            if (activeChores.length === 0) {
+                choresContainer.innerHTML = `<div class="p-6 text-center text-brand-emerald text-xs font-mono border border-dashed border-brand-emerald/10 rounded-xl bg-brand-emerald/5"><i class="fa-solid fa-circle-check"></i> All household chores cleared!</div>`;
+            } else {
+                activeChores.forEach(chore => {
+                    choresContainer.innerHTML += `
+                        <div id="${chore.id}" class="p-3 rounded-xl border border-white/5 bg-white/[0.01] flex items-center justify-between transition-all duration-300 group">
+                            <div>
+                                <h5 class="text-xs font-bold text-white leading-tight">${chore.name}</h5>
+                                <span class="text-[10px] text-gray-500 leading-normal block">${chore.schedule}</span>
+                            </div>
+                            <button class="px-2 py-1 rounded bg-brand-emerald/10 hover:bg-brand-emerald text-brand-emerald hover:text-white border border-brand-emerald/20 text-[10px] font-bold transition-all flex items-center gap-1" onclick="completeChore('${chore.id}', event)">
+                                <span class="spinner hidden mr-1"><i class="fa-solid fa-circle-notch animate-spin"></i></span>
+                                Clear
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // Toggle engine intercept mechanisms
+        function setSimMode(mode) {
+            currentEngineMode = mode;
+            const btnOptimistic = document.getElementById('mode-optimistic');
+            const btnLegacy = document.getElementById('mode-legacy');
+            const desc = document.getElementById('mode-desc');
+
+            if (!btnOptimistic || !btnLegacy || !desc) return;
+
+            if (mode === 'optimistic') {
+                btnOptimistic.className = "py-2 text-xs font-bold rounded-md transition-all bg-brand text-white shadow-md shadow-brand/20";
+                btnLegacy.className = "py-2 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
+                desc.innerHTML = `<strong>⚡ Optimistic Mode:</strong> Click any action and it takes place instantly. UI components update without waiting for database confirmation responses.`;
+                showToast("System Mode Adjusted", "Switched to High-Speed Optimistic Action Cache Engine.", "info");
+            } else {
+                btnLegacy.className = "py-2 text-xs font-bold rounded-md transition-all bg-brand text-white shadow-md shadow-brand/20";
+                btnOptimistic.className = "py-2 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
+                desc.innerHTML = `<strong>🐌 Standard Mode:</strong> Emulates native polling sync. Clicking any trigger halts interaction while waiting for server response callbacks to execute (simulating a 3-second network freeze).`;
+                showToast("System Mode Adjusted", "Switched to standard polling emulation. Expect interaction lag.", "warning");
+            }
+        }
+
+        // Output lines directly inside log viewer component
+        function logTerminal(message, type = "info") {
+            const term = document.getElementById('sim-terminal');
+            if (!term) return;
+            const time = new Date().toLocaleTimeString();
+            let prefix = `<span class="text-brand-light">[INFO ${time}]</span>`;
+            if (type === 'success') prefix = `<span class="text-brand-emerald">[SUCCESS ${time}]</span>`;
+            if (type === 'warning') prefix = `<span class="text-amber-400">[WARN ${time}]</span>`;
+            if (type === 'api') prefix = `<span class="text-brand-purple">[API ${time}]</span>`;
+
+            term.innerHTML += `<div>${prefix} ${message}</div>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        // Custom notification system (Prevents using alert)
+        function showToast(title, body, type = "success") {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = "toast-enter p-4 rounded-xl border glass-card shadow-xl flex items-start gap-3 pointer-events-auto select-none";
+            
+            let icon = '<i class="fa-solid fa-circle-check text-brand-emerald text-lg"></i>';
+            if (type === 'warning') {
+                toast.classList.add('border-amber-500/30');
+                icon = '<i class="fa-solid fa-circle-exclamation text-amber-500 text-lg"></i>';
+            } else if (type === 'info') {
+                toast.classList.add('border-brand/30');
+                icon = '<i class="fa-solid fa-info text-brand-light text-lg"></i>';
+            } else {
+                toast.classList.add('border-brand-emerald/30');
+            }
+
+            toast.innerHTML = `
+                ${icon}
+                <div>
+                    <h6 class="text-xs font-bold text-white leading-tight">${title}</h6>
+                    <p class="text-[10px] text-gray-400 mt-0.5 leading-normal">${body}</p>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = "slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) reverse forwards";
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        // Sparkle interaction feedback
+        function spawnSparkles(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            for (let i = 0; i < 6; i++) {
+                const sparkle = document.createElement('span');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                sparkle.style.width = `${Math.random() * 5 + 3}px`;
+                sparkle.style.height = sparkle.style.width;
+
+                const mx = (Math.random() - 0.5) * 80;
+                const my = (Math.random() - 0.5) * 80;
+                sparkle.style.setProperty('--mx', `${mx}px`);
+                sparkle.style.setProperty('--my', `${my}px`);
+
+                e.currentTarget.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 600);
+            }
+        }
+
+        // Active inventory reduction transaction
+        function consumeProduct(itemId, event) {
+            const item = pantryItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            spawnSparkles(event);
+            const button = event.currentTarget;
+            const spinner = button.querySelector('.spinner');
+
+            if (currentEngineMode === 'optimistic') {
+                // Instant Visual feedback implementation
+                logTerminal(`Optimistic UI intercepted click on [${item.name}]. UI state updated instantly.`, "success");
+                pantryItems = pantryItems.filter(i => i.id !== itemId);
+                updateDashboardUI();
+                showToast("Product Consumed", `Deducted 1 x ${item.name} from Home Database.`, "success");
+
+                // Execute REST dispatcher logic in the background
+                logTerminal(`Dispatched backend post handler: grocy.consume_product_from_stock { product_id: ${item.id} }`, "api");
+            } else {
+                // Standard Blocking simulation logic (Simulates old integration errors)
+                button.disabled = true;
+                if (spinner) spinner.classList.remove('hidden');
+                logTerminal(`Dispatched standard synchronous post. Halting UI update while waiting...`, "warning");
+                
+                setTimeout(() => {
+                    pantryItems = pantryItems.filter(i => i.id !== itemId);
+                    updateDashboardUI();
+                    if (spinner) spinner.classList.add('hidden');
+                    button.disabled = false;
+                    logTerminal(`Received DB Callback Response [200]. Updating local state layout.`, "success");
+                    showToast("Product Consumed (Synced)", `Deducted 1 x ${item.name} from database.`, "success");
+                }, 3000); // 3-second artificial network loop stall
+            }
+        }
+
+        // Complete household Chore item
+        function completeChore(choreId, event) {
+            const chore = choreItems.find(c => c.id === choreId);
+            if (!chore) return;
+
+            spawnSparkles(event);
+            const button = event.currentTarget;
+            const spinner = button.querySelector('.spinner');
+
+            if (currentEngineMode === 'optimistic') {
+                logTerminal(`Optimistic UI resolved chore completion [${chore.name}]. UI state updated instantly.`, "success");
+                choreItems = choreItems.filter(c => c.id !== choreId);
+                updateDashboardUI();
+                showToast("Chore Cleared", `Chore [${chore.name}] updated in home register.`, "success");
+                logTerminal(`Dispatched background post: grocy.execute_chore { chore_id: ${chore.baseId} }`, "api");
+            } else {
+                button.disabled = true;
+                if (spinner) spinner.classList.remove('hidden');
+                logTerminal(`Dispatched standard chore post. UI freeze engaged...`, "warning");
+
+                setTimeout(() => {
+                    choreItems = choreItems.filter(c => c.id !== choreId);
+                    updateDashboardUI();
+                    if (spinner) spinner.classList.add('hidden');
+                    button.disabled = false;
+                    logTerminal(`DB update committed successfully for chore register.`, "success");
+                    showToast("Chore Completed (Synced)", `Database logged execution state.`, "success");
+                }, 3000);
+            }
+        }
+
+        // Trigger simulator NFC actions
+        function triggerNFC(tagType, actionId) {
+            logTerminal(`[NFC Scan Registered] Scanned physical tag payload identifier for target action id: ${actionId}`, "api");
+            showToast("NFC Sticker Read", `Sending automated command trigger chain...`, "info");
+            
+            if (tagType === 'dog_food') {
+                logTerminal(`NFC Automation Event triggered: Executing services concurrently...`, "api");
+                
+                // Complete Dog Feeding Chore
+                const dogChore = choreItems.find(c => c.id === 'chore-dog');
+                if (dogChore) {
+                    choreItems = choreItems.filter(c => c.id !== 'chore-dog');
+                    logTerminal(`Completed Chore: "Feed the Dogs" via NFC handler integration.`, "success");
+                }
+                
+                // Consume associated stock item (Whole Milk simulating raw resource)
+                pantryItems = pantryItems.map(item => {
+                    if (item.name === 'Fresh Whole Milk') {
+                        return { ...item, count: Math.max(0, item.count - 1) };
+                    }
+                    return item;
+                });
+
+                updateDashboardUI();
+                showToast("Smart Pantry Run Successful", "Dog food consumed & task cleared!", "success");
+            }
+        }
+
+        // Mock AI receipt scanner
+        function runAIReceiptVision() {
+            logTerminal(`[AI Scanner Initialized] Spawning thread to process virtual invoice image...`, "api");
+            showToast("Parsing Receipt Image", "AI model extracting items, quantities, and matching database entities...", "info");
+
+            setTimeout(() => {
+                const newItems = [
+                    { id: 'item-apples', name: 'Gala Apples (AI Import)', details: 'Expires in 10 days', type: 'normal', count: 6, base: 6, metric: 'qty' },
+                    { id: 'item-butter', name: 'Salted Cream Butter (AI)', details: 'Expires in 20 days', type: 'normal', count: 2, base: 2, metric: 'qty' }
+                ];
+                pantryItems = [...pantryItems, ...newItems];
+                updateDashboardUI();
+                logTerminal(`Receipt Vision processing resolved. Model matches schema with 98% accuracy.`, "success");
+                logTerminal(`Added bulk entities: grocy.add_products_by_name { Gala Apples: 6, Butter: 2 }`, "api");
+                showToast("Import Complete", "AI restocked pantry with Apples & Butter successfully!", "success");
+            }, 2500);
+        }
+
+        // Reset database items back to default
+        function resetSimulationData() {
+            pantryItems = [
+                { id: 'item-milk', name: 'Fresh Whole Milk', details: 'Expires in 2 days', type: 'expiring', count: 1, base: 1, metric: 'L' },
+                { id: 'item-avocado', name: 'Avocado Bag', details: 'Expires today!', type: 'expired', count: 1, base: 1, metric: 'qty' },
+                { id: 'item-yogurt', name: 'Greek Yogurt Pack', details: 'Expires in 5 days', type: 'normal', count: 4, base: 4, metric: 'qty' },
+                { id: 'item-eggs', name: 'Organic Dozen Eggs', details: 'Expires in 12 days', type: 'normal', count: 1, base: 1, metric: 'qty' }
+            ];
+
+            choreItems = [
+                { id: 'chore-dog', name: 'Feed the Dogs', schedule: 'Morning schedule', completed: false, baseId: 12 },
+                { id: 'chore-trash', name: 'Take out Trash Bin', schedule: 'Weekly schedule', completed: false, baseId: 15 }
+            ];
+
+            updateDashboardUI();
+            logTerminal("Restored initial test data registers.", "info");
+            showToast("Simulation Reset", "Reloaded default test pantry and chore components.", "info");
+        }
+
+        // Copy plain text path snippets to system clipboards
+        function copySnippet(id) {
+            let text = '';
+            if (id === 'hacs-repo') text = 'https://github.com/DonTranQuiL/Grocy';
+            if (id === 'card-path') text = '/config/www/grocy-action-card.js';
+            
+            const area = document.createElement('textarea');
+            area.value = text;
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand('copy');
+            document.body.removeChild(area);
+            showToast("Copied to Clipboard", text, "success");
+        }
+
+        // Copy raw yaml templates to memory
+        function copyCodeBlock(id) {
+            const block = document.getElementById(id);
+            if (!block) return;
+            const area = document.createElement('textarea');
+            area.value = block.innerText;
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand('copy');
+            document.body.removeChild(area);
+            showToast("Code Copied", "YAML structure placed in keyboard memory stream.", "success");
+        }
+    </script>
+
+    <!-- 3D Graphics Visualizer Script -->
+    <script>
+        let scene, camera, renderer, particles;
+        let mouseX = 0, mouseY = 0;
+
+        // Initialize Three.js swirling background particles
+        function initThreeJS() {
+            const container = document.getElementById('webgl-background');
+            if (!container) return;
+            
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Scene Setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, width / height, 1, 1000);
+            camera.position.z = 250;
+
+            // Particles Geometry setup
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+
+            const particleCount = 200;
+            for (let i = 0; i < particleCount; i++) {
+                positions.push((Math.random() - 0.5) * 600);
+                positions.push((Math.random() - 0.5) * 600);
+                positions.push((Math.random() - 0.5) * 600);
+
+                // Setup colors matching gradients (Cyan & Purple)
+                const isCyan = Math.random() > 0.5;
+                if (isCyan) {
+                    colors.push(0.22, 0.74, 0.97); // Cyan
+                } else {
+                    colors.push(0.54, 0.36, 0.96); // Purple
+                }
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            // Particle Material Styling
+            const material = new THREE.PointsMaterial({
+                size: 3,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.45,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onDocumentMouseMove);
+
+            animate();
+        }
+
+        // Re-calculate dimensions when the browser window scale changes
+        function onWindowResize() {
+            if (!camera || !renderer) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - window.innerWidth / 2) * 0.05;
+            mouseY = (event.clientY - window.innerHeight / 2) * 0.05;
+        }
+
+        // Main rendering animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (particles) {
+                particles.rotation.x += 0.0008;
+                particles.rotation.y += 0.0006;
+            }
+
+            if (camera && scene) {
+                camera.position.x += (mouseX - camera.position.x) * 0.05;
+                camera.position.y += (-mouseY - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+            }
+
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // DOM Loaded event listener: Ensures element targets exist in DOM first!
+        window.addEventListener('DOMContentLoaded', () => {
+            // Update Dashboard Simulator elements
+            updateDashboardUI();
+            
+            // Start 3D background visual systems safely
+            initThreeJS();
+        });
+
+        // Navigation header scrolled opacity transition
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (!navbar) return;
+            if (window.scrollY > 40) {
+                navbar.classList.add('bg-[#050811]/95', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-[#050811]/95', 'shadow-lg');
+            }
+        });
+    </script>
+</body>
+</html>
