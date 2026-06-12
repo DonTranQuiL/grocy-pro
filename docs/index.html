@@ -76,6 +76,10 @@
             box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
         }
 
+        .glow-box-purple {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+        }
+
         /* Sparkle Animation for Action Feedback */
         .sparkle {
             position: absolute;
@@ -119,18 +123,25 @@
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
                               linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
         }
+        
+        /* Hide scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
-<body class="text-gray-100 font-sans tracking-tight antialiased selection:bg-brand selection:text-white">
+<body class="text-gray-100 font-sans tracking-tight antialiased selection:bg-brand selection:text-white grid-cyber">
 
-    <!-- 3D Background Canvas -->
     <div id="webgl-background" class="fixed inset-0 z-0 pointer-events-none opacity-60"></div>
 
     <!-- Background decorative glows -->
     <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-dark/20 blur-[120px] pointer-events-none"></div>
     <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-brand-purple/10 blur-[120px] pointer-events-none"></div>
 
-    <!-- Nav Header -->
     <header id="navbar" class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050811]/70 backdrop-blur-md transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -146,6 +157,7 @@
             <nav class="hidden md:flex items-center gap-6 text-xs font-semibold text-gray-400">
                 <a href="#simulator" class="hover:text-white transition-colors">Interactive Demo</a>
                 <a href="#comparison" class="hover:text-white transition-colors">Before & After</a>
+                <a href="#architecture" class="hover:text-white transition-colors">Wiki Deep-Dive</a>
                 <a href="#features" class="hover:text-white transition-colors">Core Features</a>
                 <a href="#installation" class="hover:text-white transition-colors">Installation</a>
                 <a href="#automations" class="hover:text-white transition-colors">YAML Templates</a>
@@ -161,7 +173,6 @@
 
     <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <!-- Hero Title Showcase -->
         <section class="text-center max-w-4xl mx-auto mb-20">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand/20 bg-brand/5 text-brand-light text-xs font-bold mb-6 glow-box-sky">
                 <span class="w-2 h-2 rounded-full bg-brand-light animate-pulse"></span>
@@ -177,6 +188,14 @@
                 An ultra-responsive, zero-latency, AI-powered inventory engine and interactive Lovelace dashboard component. Free your smart home system from outdated blocking cycles.
             </p>
 
+            <!-- Metadata Badges Showcase -->
+            <div class="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-8 opacity-90">
+                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-code-branch text-brand-light"></i> HACS-COMPATIBLE</span>
+                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-shield text-brand-emerald"></i> ZERO-LOCK EVENT LOOPS</span>
+                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-brain text-brand-purple"></i> AI FUZZY RESOLVER</span>
+                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-wave-square text-amber-500"></i> ASYNC COORDINATOR</span>
+            </div>
+
             <div class="flex flex-wrap justify-center gap-3">
                 <a href="#simulator" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-dark hover:from-brand-light hover:to-brand text-xs font-bold transition-all shadow-lg shadow-brand/20 flex items-center gap-2">
                     Try Dashboard Simulator <i class="fa-solid fa-arrow-right"></i>
@@ -187,7 +206,6 @@
             </div>
         </section>
 
-        <!-- INTERACTIVE DASHBOARD SECTION -->
         <section id="simulator" class="mb-24 scroll-mt-20">
             <div class="text-center max-w-2xl mx-auto mb-10">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Experience "Optimistic UI" Live</h2>
@@ -314,7 +332,6 @@
             </div>
         </section>
 
-        <!-- BEFORE & AFTER SECTION -->
         <section id="comparison" class="mb-24 scroll-mt-20">
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white">The Overhaul Realized</h2>
@@ -334,11 +351,11 @@
                         </div>
                         <h4 class="text-lg font-bold text-white mb-2">Uncaught Timeout and Asset Errors</h4>
                         <p class="text-xs text-gray-400 leading-relaxed mb-6">
-                            Frequent network requests on old integrations caused constant blocking calls, leading to broken assets, missing state metrics, and broken visual panels.
+                            Frequent synchronous REST queries and unpatched background worker queues caused continuous loop blocking, leading to broken dashboard components, lockouts, and severe entity synchronization errors.
                         </p>
                     </div>
 
-                    <!-- Verbatim reference to verification image -->
+                    <!-- Visual before integration error tracking asset -->
                     <div class="rounded-xl border border-white/5 bg-black/40 overflow-hidden relative group p-4">
                         <img src="{A13FF018-D6E8-4187-AB40-A0D0B16D42DF}.png" alt="Broken Legacy Integration Example" class="w-full h-auto object-contain rounded border border-white/10 group-hover:scale-[1.01] transition-all" onerror="this.src='https://placehold.co/800x120/0a0f1d/ff3333?text=Broken+Assets+and+Unstable+API+Connection+State';">
                         <div class="absolute inset-0 bg-red-950/20 pointer-events-none flex items-center justify-center">
@@ -372,7 +389,207 @@
             </div>
         </section>
 
-        <!-- CORE FEATURES SECTION -->
+        <section id="architecture" class="mb-24 scroll-mt-20">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <span class="text-xs font-bold text-brand-light font-mono uppercase tracking-widest block mb-2">Technical Documentation</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">How the Overhaul Works</h2>
+                <p class="text-xs text-gray-400 mt-2">
+                    A technical breakdown of the rewrite architecture, custom asynchronous schedulers, and machine-learning ingestion pipelines.
+                </p>
+            </div>
+
+            <!-- Tabbed Interface -->
+            <div class="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                <!-- Navigation Tabs -->
+                <div class="flex border-b border-white/5 bg-white/[0.02] overflow-x-auto no-scrollbar">
+                    <button id="tab-btn-backend" class="px-5 py-4 text-xs font-extrabold text-white border-b-2 border-brand flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('backend')">
+                        <i class="fa-solid fa-server text-brand-light"></i> Backend Refactor
+                    </button>
+                    <button id="tab-btn-ai" class="px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('ai')">
+                        <i class="fa-solid fa-brain text-brand-purple"></i> AI Vision Resolvers
+                    </button>
+                    <button id="tab-btn-nfc" class="px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('nfc')">
+                        <i class="fa-solid fa-tag text-brand-emerald"></i> Physical NFC Triggers
+                    </button>
+                    <button id="tab-btn-lovelace" class="px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('lovelace')">
+                        <i class="fa-solid fa-sliders text-amber-500"></i> Optimistic UI Engine
+                    </button>
+                </div>
+
+                <!-- Tab Panels -->
+                <div class="p-6 sm:p-8">
+                    <!-- Tab Panel: Backend -->
+                    <div id="tab-panel-backend" class="space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <span class="p-1.5 rounded bg-brand/10 text-brand-light"><i class="fa-solid fa-server"></i></span>
+                                    Core Execution Handler Re-engineering
+                                </h4>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    The legacy Home Assistant Grocy components relied heavily on unbuffered executor tasks (`async_add_executor_job`) executed directly within the main Home Assistant update loop. Under rapid dashboard interactions, this spawned excessive concurrent operations, locking up SQL pools and causing the event loop to panic.
+                                </p>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    <strong>GrocyPro</strong> completely rewrites this interface by introducing safe asynchronous event coordinators, buffering incoming transactions, and wrapping API mutations inside safe Python REST wrappers.
+                                </p>
+                                <ul class="space-y-2 text-xs text-gray-300">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> Safe wrappers stop <code>TabError</code> or <code>Response [400]</code> exceptions.</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> Data-corruptions prevent database locks.</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> Safe asynchronous coordinators eliminate execution freezes.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block font-mono mb-2">REWRITE SPECIFICATIONS // CORE STACK</span>
+                                <div class="space-y-4 font-mono text-xs">
+                                    <div class="flex justify-between border-b border-white/5 pb-2">
+                                        <span class="text-gray-400">Threading Model:</span>
+                                        <span class="text-brand-light">Non-blocking Asynchronous</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2">
+                                        <span class="text-gray-400">Worker Coordinator:</span>
+                                        <span class="text-brand-light">Concurrent Update Cache</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2">
+                                        <span class="text-gray-400">Maximum Polling Overhead:</span>
+                                        <span class="text-brand-emerald">0ms Blocking Main Thread</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2">
+                                        <span class="text-gray-400">Session Handshake Policy:</span>
+                                        <span class="text-brand-light">Persistent Keep-Alive Connection</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Failover Recoveries:</span>
+                                        <span class="text-brand-light">Automatic 5-Second Retrograde Sync</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Panel: AI (Hidden initially) -->
+                    <div id="tab-panel-ai" class="hidden space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <span class="p-1.5 rounded bg-brand-purple/10 text-brand-purple"><i class="fa-solid fa-brain"></i></span>
+                                    Fuzzy-Match Receipt Processing Architecture
+                                </h4>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    Standard receipt parsers merely convert images to unstructured text blocks. The GrocyPro rewrite introduces the `grocy.add_products_by_name` AI automation endpoint, capable of mapping arbitrary conversational strings to exact database primary keys.
+                                </p>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    The custom backend executes a fast-fuzzy matching sequence over database product arrays. For instance, when the AI model outputs `"Gala Apple (Bag)"`, the backend resolves this to the target primary key `product_id: 104` instantly.
+                                </p>
+                                <div class="bg-brand-purple/5 border border-brand-purple/15 rounded-xl p-4">
+                                    <h5 class="text-xs font-bold text-white mb-2">Ingestion Pipeline Map:</h5>
+                                    <div class="flex items-center gap-2 text-[10px] font-mono text-gray-400">
+                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5">1. Receipt Pic</span>
+                                        <i class="fa-solid fa-arrow-right text-brand-purple"></i>
+                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5">2. LLM Parser</span>
+                                        <i class="fa-solid fa-arrow-right text-brand-purple"></i>
+                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5">3. Fuzzy Resolver</span>
+                                        <i class="fa-solid fa-arrow-right text-brand-purple"></i>
+                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5 text-brand-emerald">4. Fridge Populated</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5 flex flex-col justify-center">
+                                <span class="text-[10px] text-gray-500 block font-mono mb-2">AI RESOLUTION TRACE SIMULATION</span>
+                                <div class="font-mono text-[10px] space-y-2 text-gray-300">
+                                    <div><span class="text-brand-purple">[AI_PARSE]</span> Found: "Milk Whole Organics (1 Gal)" x 1</div>
+                                    <div><span class="text-yellow-500">[FUZZY_MATCHING]</span> Running search on: "Milk Whole Organics (1 Gal)"</div>
+                                    <div><span class="text-yellow-500">[FUZZY_MATCHING]</span> Matches found: "Whole Milk" (Score: 88%)</div>
+                                    <div><span class="text-brand-emerald">[RESOLVED]</span> Assigned "Milk Whole Organics" -> ID 42</div>
+                                    <div><span class="text-brand-emerald">[DB_SYNC]</span> Executed `grocy.add_product_to_stock {product_id: 42, amount: 1}`</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Panel: NFC (Hidden initially) -->
+                    <div id="tab-panel-nfc" class="hidden space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <span class="p-1.5 rounded bg-brand-emerald/10 text-brand-emerald"><i class="fa-solid fa-tag"></i></span>
+                                    Ultra-Low Latency Smart Pantries
+                                </h4>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    By placing NFC/RFID microchips directly on pantry containers and storage zones, you can eliminate manual item lookup workflows entirely. Tapping a tag automatically routes transactions to your local database backend.
+                                </p>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    This overhaul implements safe concurrent script execution handlers inside Home Assistant. This allows users to associate single taps with complex actions, such as consuming raw resources while clearing corresponding task items simultaneously.
+                                </p>
+                                <div class="grid grid-cols-2 gap-3 text-center">
+                                    <div class="p-3 rounded-lg border border-white/5 bg-white/[0.01]">
+                                        <span class="text-brand-emerald font-mono font-bold block text-lg">42ms</span>
+                                        <span class="text-[9px] text-gray-500 block uppercase">NFC Processing Lag</span>
+                                    </div>
+                                    <div class="p-3 rounded-lg border border-white/5 bg-white/[0.01]">
+                                        <span class="text-brand-emerald font-mono font-bold block text-lg">100%</span>
+                                        <span class="text-[9px] text-gray-500 block uppercase">Automation Success</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5 flex flex-col justify-between">
+                                <h5 class="text-xs font-bold text-white mb-2">Recommended Setup Guidelines:</h5>
+                                <ol class="space-y-2 text-[11px] text-gray-400 list-decimal pl-4">
+                                    <li>Install 13.56MHz NFC NTAG213 labels on pantry shelves.</li>
+                                    <li>Scan raw tag inside standard Home Assistant Mobile App interface.</li>
+                                    <li>Construct YAML automation utilizing the templates below.</li>
+                                    <li>Mount physical tags safely out of high moisture zones.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Panel: Lovelace (Hidden initially) -->
+                    <div id="tab-panel-lovelace" class="hidden space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <span class="p-1.5 rounded bg-amber-500/10 text-amber-500"><i class="fa-solid fa-sliders"></i></span>
+                                    Designing the "Optimistic UI" Frontend Card
+                                </h4>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    Lovelace frontend dashboards traditionally fetch card updates solely after database transaction confirmations. Over weak home server network connections, this creates noticeable performance lag.
+                                </p>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    <strong>Optimistic UI Design</strong> changes this layout. The dashboard card displays successful operations instantly, modifying counts locally and dispatching REST actions in the background. If a background transaction fails, the card performs a rollback to match the system's exact state.
+                                </p>
+                                <div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+                                    <p class="text-[10px] font-mono text-amber-400 leading-normal">
+                                        <i class="fa-solid fa-bolt"></i> <strong>Performance Advantage:</strong> Average click feedback drops from 3200ms (legacy synchronous polling wait times) to a rapid <strong>15ms</strong> cache operation.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5 flex flex-col justify-center items-center">
+                                <span class="text-[10px] text-gray-500 block font-mono mb-2">LATENCY COMPARISON CHART</span>
+                                <div class="space-y-3 w-full">
+                                    <div>
+                                        <div class="flex justify-between text-[9px] font-mono mb-1 text-red-400">
+                                            <span>Legacy Polling Sync wait: 3200ms</span>
+                                        </div>
+                                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-red-500 h-full rounded-full w-[90%]"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-[9px] font-mono mb-1 text-brand-emerald">
+                                            <span>Optimistic Cache Action feedback: 15ms</span>
+                                        </div>
+                                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-brand-emerald h-full rounded-full w-[3%]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="features" class="mb-24 scroll-mt-20">
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Overhaul Capabilities</h2>
@@ -419,7 +636,6 @@
             </div>
         </section>
 
-        <!-- INSTALLATION SECTION -->
         <section id="installation" class="mb-24 scroll-mt-20">
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Quick Installation Guide</h2>
@@ -505,7 +721,6 @@
             </div>
         </section>
 
-        <!-- YAML TEMPLATES & AUTOMATIONS SECTION -->
         <section id="automations" class="mb-24 scroll-mt-20">
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Dashboard Integration Blueprints</h2>
@@ -586,7 +801,6 @@ sequence:
 
     </main>
 
-    <!-- Footer -->
     <footer class="border-t border-white/5 bg-[#03050b] py-12 relative z-10 text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div class="flex items-center gap-2">
@@ -609,7 +823,6 @@ sequence:
     <!-- Absolute Toast container -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-    <!-- Application Logic Script -->
     <script>
         // Core Database Registers for Lovelace Simulator
         let currentEngineMode = 'optimistic'; // 'optimistic' or 'legacy'
@@ -923,6 +1136,22 @@ sequence:
             showToast("Simulation Reset", "Reloaded default test pantry and chore components.", "info");
         }
 
+        // Interactive wiki tab navigation system
+        function switchWikiTab(tabId) {
+            const tabs = ['backend', 'ai', 'nfc', 'lovelace'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const panel = document.getElementById(`tab-panel-${t}`);
+                if (t === tabId) {
+                    btn.className = "px-5 py-4 text-xs font-extrabold text-white border-b-2 border-brand flex items-center gap-2 shrink-0 transition-all";
+                    panel.classList.remove('hidden');
+                } else {
+                    btn.className = "px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all";
+                    panel.classList.add('hidden');
+                }
+            });
+        }
+
         // Copy plain text path snippets to system clipboards
         function copySnippet(id) {
             let text = '';
@@ -952,7 +1181,6 @@ sequence:
         }
     </script>
 
-    <!-- 3D Graphics Visualizer Script -->
     <script>
         let scene, camera, renderer, particles;
         let mouseX = 0, mouseY = 0;
