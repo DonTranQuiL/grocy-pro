@@ -9,6 +9,7 @@
 
 > ⚠️ **MASSIVE OVERHAUL ANNOUNCEMENT (V2.0.0):** 
 > We have taken the original Grocy integration and completely rebuilt the interaction layer! This repository provides a **Bulletproof Python Backend** (fixing legacy crash loops and executor bugs) paired natively with a brand-new **Optimistic UI Frontend Card**. Welcome to the era of instant clicks, NFC Smart Pantries, and AI Receipt Scanning!
+And we added the live data stream card to HASS as well.
 
 [![Latest Release](https://img.shields.io/github/v/release/DonTranQuiL/grocy-pro?style=for-the-badge&color=007ec6)](https://github.com/DonTranQuiL/grocy-pro/releases)
 [![License](https://img.shields.io/github/license/DonTranQuiL/grocy-pro?style=for-the-badge&color=007ec6)](https://github.com/DonTranQuiL/grocy-pro/blob/main/LICENSE)
@@ -82,7 +83,7 @@ This God-Tier overhaul requires installing both the **Backend Integration** and 
 
 ---
 
-## 📍 Interactive Dashboard Configuration
+## 📍 Interactive Dashboard Configuration OVERHAUL!!! ADDED LIVE DATA STREAM
 
 To deploy the Command Center to your dashboard, simply use the visual editor, select "Manual Card", and paste the following YAML. *(Tip: Use the new 'Sections', 'Panel', or 'Sidebar' view layout in HA to let this card stretch out beautifully!)*
 
@@ -92,7 +93,7 @@ layout_options:
   grid_columns: 3
 ```
 
-<img width="760" height="905" alt="{765AB7EC-13BB-4DA8-942B-2DBC8F2C6C9F}" src="https://github.com/user-attachments/assets/5dbde71f-48ea-4cd8-ae40-88f57d467c9d" />
+<img width="763" height="597" alt="NEWCARD" src="https://github.com/user-attachments/assets/e43e3036-4584-451c-ab66-989d559f6599" />
 
 
 ### Advanced UI Customization
