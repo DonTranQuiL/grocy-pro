@@ -92,6 +92,9 @@ layout_options:
   grid_columns: 3
 ```
 
+<img width="760" height="905" alt="{765AB7EC-13BB-4DA8-942B-2DBC8F2C6C9F}" src="https://github.com/user-attachments/assets/5dbde71f-48ea-4cd8-ae40-88f57d467c9d" />
+
+
 ### Advanced UI Customization
 The card dynamically adapts its Grid layout. If viewed on a narrow mobile phone, the buttons will safely wrap to prevent cut-offs. If viewed on a wide wall-mounted tablet, the statistics grid and action buttons expand horizontally to fill the space perfectly.
 
