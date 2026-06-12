@@ -235,8 +235,19 @@ class GrocyActionCard extends HTMLElement {
     const overdueItems = [];
     const taskItems = [];
     const choreItems = [];
-    const foodItems = [];
     const shoppingItems = [];
+    
+    // --- THE SMART LOCATION MAPPING ---
+    const locationNames = {
+      1: "Pantry",
+      2: "Fridge",
+      3: "Freezer",
+      4: "Cupboards"
+      // Add more IDs here as you create locations in Grocy!
+    };
+    
+    // We will dynamically group the food into this object
+    const foodByLocation = {};
 
     // Process Tasks
     tasks.forEach(task => {
@@ -266,7 +277,7 @@ class GrocyActionCard extends HTMLElement {
       });
     });
 
-    // Process Food (FIXED: Now loops through the entire stock array)
+    // Process Food & Sort by Location
     const foodSet = new Set();
     stock.forEach(food => {
       const id = food.product_id || food.id;
@@ -280,7 +291,14 @@ class GrocyActionCard extends HTMLElement {
       if (overdueFlag) {
         overdueItems.push(item); 
       } else {
-        foodItems.push(item);
+        // Group the good food by its location ID
+        const locId = food.location_id || 1;
+        const locName = locationNames[locId] || `Storage #${locId}`;
+        
+        if (!foodByLocation[locName]) {
+          foodByLocation[locName] = [];
+        }
+        foodByLocation[locName].push(item);
       }
     });
 
@@ -297,7 +315,10 @@ class GrocyActionCard extends HTMLElement {
       });
     });
 
-    const total = overdueItems.length + taskItems.length + choreItems.length + foodItems.length + shoppingItems.length;
+    // Calculate total food count for stats
+    let totalFood = 0;
+    Object.values(foodByLocation).forEach(arr => totalFood += arr.length);
+    const total = overdueItems.length + taskItems.length + choreItems.length + totalFood + shoppingItems.length;
 
     const section = (title, icon, items, overdueSection = false) => {
       let html = `
@@ -308,84 +329,95 @@ class GrocyActionCard extends HTMLElement {
         </div>
       `;
 
-      if (!items.length) {
+      if (!items || !items.length) {
         html += `<div class="empty">Nothing here 🎉</div>`;
-      }
+      } else {
+        items.forEach(item => {
+          let buttons = "";
+          let hardDeleteHtml = "";
+          let rowIcon = "mdi:check";
 
-      items.forEach(item => {
-        let buttons = "";
-        let hardDeleteHtml = "";
-        let rowIcon = "mdi:check";
-
-        if (item.type === "task") {
-          rowIcon = "mdi:clipboard-check-outline";
-          buttons = `<button class="btn action-btn" data-action="task" data-id="${item.id}">Done</button>`;
-          hardDeleteHtml = `<div class="delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="tasks" title="Delete Task"><ha-icon style="pointer-events: none;" icon="mdi:delete-outline"></ha-icon></div>`;
-        } 
-        else if (item.type === "chore") {
-          rowIcon = "mdi:broom";
-          buttons = `<button class="btn action-btn" data-action="chore" data-id="${item.id}">Done</button>`;
-          hardDeleteHtml = `<div class="delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="chores" title="Delete Chore"><ha-icon style="pointer-events: none;" icon="mdi:delete-outline"></ha-icon></div>`;
-        } 
-        else if (item.type === "battery") {
-          rowIcon = "mdi:battery-alert";
-          buttons = `<button class="btn action-btn" data-action="battery" data-id="${item.id}">Charge</button>`;
-        }
-        else if (item.type === "shopping") {
-          rowIcon = "mdi:cart-outline";
-          buttons = `<button class="btn action-btn" data-action="shopping" data-id="${item.id}">Remove</button>`;
-        }
-        else if (item.type === "food") {
-          rowIcon = "mdi:food-apple";
-          
-          // FIXED: Smart Button Logic
-          if (item.overdue) {
-            // Bad Food: Only show Waste
-            buttons = `<button class="btn waste action-btn" data-action="consume" data-id="${item.id}" data-spoiled="true">Waste</button>`;
-          } else {
-            // Good Food: Show Open and Consume
-            buttons = `
-              <button class="btn open action-btn" data-action="open" data-id="${item.id}">Open</button>
-              <button class="btn action-btn" data-action="consume" data-id="${item.id}" data-spoiled="false">Consume</button>
-            `;
+          if (item.type === "task") {
+            rowIcon = "mdi:clipboard-check-outline";
+            buttons = `<button class="btn action-btn" data-action="task" data-id="${item.id}">Done</button>`;
+            hardDeleteHtml = `<div class="delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="tasks" title="Delete Task"><ha-icon style="pointer-events: none;" icon="mdi:delete-outline"></ha-icon></div>`;
+          } 
+          else if (item.type === "chore") {
+            rowIcon = "mdi:broom";
+            buttons = `<button class="btn action-btn" data-action="chore" data-id="${item.id}">Done</button>`;
+            hardDeleteHtml = `<div class="delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="chores" title="Delete Chore"><ha-icon style="pointer-events: none;" icon="mdi:delete-outline"></ha-icon></div>`;
+          } 
+          else if (item.type === "battery") {
+            rowIcon = "mdi:battery-alert";
+            buttons = `<button class="btn action-btn" data-action="battery" data-id="${item.id}">Charge</button>`;
           }
-        }
+          else if (item.type === "shopping") {
+            rowIcon = "mdi:cart-outline";
+            buttons = `<button class="btn action-btn" data-action="shopping" data-id="${item.id}">Remove</button>`;
+          }
+          else if (item.type === "food") {
+            rowIcon = "mdi:food-apple";
+            if (item.overdue) {
+              buttons = `<button class="btn waste action-btn" data-action="consume" data-id="${item.id}" data-spoiled="true">Waste</button>`;
+            } else {
+              buttons = `
+                <button class="btn open action-btn" data-action="open" data-id="${item.id}">Open</button>
+                <button class="btn action-btn" data-action="consume" data-id="${item.id}" data-spoiled="false">Consume</button>
+              `;
+            }
+          }
 
-        html += `
-          <div class="item">
-            <div class="item-left">
-              <ha-icon icon="${rowIcon}"></ha-icon>
-              <div class="item-info">
-                <div class="item-title">${item.title}</div>
-                <div class="item-date ${item.overdue ? 'overdue-text' : ''}">${item.type === 'shopping' && item.date ? item.date : this.relativeDate(item.date)}</div>
+          html += `
+            <div class="item">
+              <div class="item-left">
+                <ha-icon icon="${rowIcon}"></ha-icon>
+                <div class="item-info">
+                  <div class="item-title">${item.title}</div>
+                  <div class="item-date ${item.overdue ? 'overdue-text' : ''}">${item.type === 'shopping' && item.date ? item.date : this.relativeDate(item.date)}</div>
+                </div>
+              </div>
+              <div class="actions">
+                ${buttons}
+                ${hardDeleteHtml}
               </div>
             </div>
-            <div class="actions">
-              ${buttons}
-              ${hardDeleteHtml}
-            </div>
-          </div>
-        `;
-      });
-
+          `;
+        });
+      }
       html += `</div>`;
       return html;
     };
+
+    // Base Dashboard with static lists
+    let dashboardHtml = `
+      ${section("Action Required", "mdi:alert-circle", overdueItems, true)}
+      ${section("Shopping List", "mdi:cart", shoppingItems)}
+      ${section("Tasks", "mdi:clipboard-check", taskItems)}
+      ${section("Chores", "mdi:broom", choreItems)}
+    `;
+
+    // Dynamically append the Food Locations!
+    Object.keys(foodByLocation).sort().forEach(locName => {
+      // Smart Icon logic based on the name of the location
+      let icon = "mdi:package-variant-closed"; // default
+      if (locName.toLowerCase().includes("fridge")) icon = "mdi:fridge-outline";
+      if (locName.toLowerCase().includes("freez")) icon = "mdi:snowflake";
+      if (locName.toLowerCase().includes("pantry")) icon = "mdi:food-apple";
+      if (locName.toLowerCase().includes("cupboard")) icon = "mdi:cupboard";
+      
+      dashboardHtml += section(locName, icon, foodByLocation[locName]);
+    });
 
     this.content.innerHTML = `
       <div class="stats">
         <div class="stat"><div class="stat-number">${total}</div><div class="stat-label">Total</div></div>
         <div class="stat danger"><div class="stat-number">${overdueItems.length}</div><div class="stat-label">Overdue</div></div>
-        <div class="stat"><div class="stat-number">${foodItems.length}</div><div class="stat-label">Food</div></div>
+        <div class="stat"><div class="stat-number">${totalFood}</div><div class="stat-label">Food</div></div>
         <div class="stat"><div class="stat-number">${shoppingItems.length}</div><div class="stat-label">Cart</div></div>
         <div class="stat"><div class="stat-number">${choreItems.length}</div><div class="stat-label">Chores</div></div>
       </div>
       <div class="dashboard">
-        ${section("Action Required", "mdi:alert-circle", overdueItems, true)}
-        ${section("Shopping List", "mdi:cart", shoppingItems)}
-        ${section("Tasks", "mdi:clipboard-check", taskItems)}
-        ${section("Chores", "mdi:broom", choreItems)}
-        ${section("Pantry", "mdi:food-apple", foodItems)}
+        ${dashboardHtml}
       </div>
     `;
 
