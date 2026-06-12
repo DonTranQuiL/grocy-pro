@@ -4,10 +4,10 @@
 <img width="auto" height="auto" alt="Grocy Overhaul Banner" src="https://github.com/user-attachments/assets/d0649f38-c73f-466c-bf3b-73bf9765febf" />
 
 
-# 🛒 Grocy: The God-Tier Overhaul (COMING SOON!!!!)
+# 🛒 Grocy: The God-Tier Overhaul!
 **The ultimate, zero-latency, AI-powered inventory engine and interactive Command Center dashboard for Home Assistant.**
 
-> ⚠️ **MASSIVE OVERHAUL ANNOUNCEMENT (V2.0):** 
+> ⚠️ **MASSIVE OVERHAUL ANNOUNCEMENT (V2.0.0):** 
 > We have taken the original Grocy integration and completely rebuilt the interaction layer! This repository provides a **Bulletproof Python Backend** (fixing legacy crash loops and executor bugs) paired natively with a brand-new **Optimistic UI Frontend Card**. Welcome to the era of instant clicks, NFC Smart Pantries, and AI Receipt Scanning!
 
 [![Latest Release](https://img.shields.io/github/v/release/DonTranQuiL/grocy-pro?style=for-the-badge&color=007ec6)](https://github.com/DonTranQuiL/grocy-pro/releases)
