@@ -9,6 +9,7 @@ from aiohttp import hdrs, web
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
 from grocy.grocy import Grocy
 
 from .const import (

@@ -1,12 +1,13 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.grocy.const import DOMAIN, ATTR_EXPIRED_PRODUCTS
 from custom_components.grocy.binary_sensor import (
     GrocyBinarySensorEntity,
     GrocyBinarySensorEntityDescription,
 )
+from custom_components.grocy.const import ATTR_EXPIRED_PRODUCTS, DOMAIN
 
 
 @pytest.fixture

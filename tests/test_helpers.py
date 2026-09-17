@@ -1,8 +1,9 @@
 import datetime
+
 from custom_components.grocy.helpers import (
+    ProductWrapper,
     extract_base_url_and_path,
     serialize_datetime,
-    ProductWrapper,
 )
 
 

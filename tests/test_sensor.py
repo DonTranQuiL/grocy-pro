@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from homeassistant.components.sensor import SensorStateClass
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 

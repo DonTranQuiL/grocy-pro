@@ -1,13 +1,14 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.grocy.const import (
-    DOMAIN,
-    CONF_URL,
     CONF_API_KEY,
     CONF_PORT,
+    CONF_URL,
     CONF_VERIFY_SSL,
+    DOMAIN,
 )
 
 

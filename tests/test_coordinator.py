@@ -1,10 +1,11 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.grocy.const import DOMAIN, CONF_URL, CONF_API_KEY, CONF_PORT
+from custom_components.grocy.const import CONF_API_KEY, CONF_PORT, CONF_URL, DOMAIN
 from custom_components.grocy.coordinator import GrocyDataUpdateCoordinator
 
 
