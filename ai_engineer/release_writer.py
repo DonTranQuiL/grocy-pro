@@ -42,7 +42,7 @@ CRITICAL INSTRUCTIONS:
 
 try:
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="deepseek/deepseek-v4.1-flash",
         messages=[{"role": "user", "content": prompt}],
     )
 
