@@ -15,7 +15,7 @@
   "issue_tracker": "https://github.com/DonTranQuiL/grocy/issues",
   "requirements": [
     "grocy-py==0.1.0",
-    "icalendar==7.0.0"
+    "icalendar==6.3.1"
   ],
   "version": "2.0.0"
 }
