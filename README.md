@@ -1,150 +1,294 @@
 <div align="center">
 
-<!-- Replace the src link below with a screenshot of your beautiful Grocy Command Center -->
-<img width="auto" height="auto" alt="Grocy Overhaul Banner" src="https://github.com/user-attachments/assets/d0649f38-c73f-466c-bf3b-73bf9765febf" />
+<img src="docs/images/banner.png" alt="Grocy Pro: your Grocy pantry, chores and shopping list in Home Assistant" width="100%">
 
+<br>
 
-# 🛒 Grocy: The God-Tier Overhaul!
-**The ultimate, zero-latency, AI-powered inventory engine and interactive Command Center dashboard for Home Assistant.**
+**[Grocy](https://grocy.info) in Home Assistant: stock and due dates, the shopping list as a to-do list, chores, tasks, batteries, the meal plan and Grocy's calendar, plus actions and a one-tap dashboard card.**
 
-> ⚠️ **MASSIVE OVERHAUL ANNOUNCEMENT (V2.0.0):** 
-> We have taken the original Grocy integration and completely rebuilt the interaction layer! This repository provides a **Bulletproof Python Backend** (fixing legacy crash loops and executor bugs) paired natively with a brand-new **Optimistic UI Frontend Card**. Welcome to the era of instant clicks, NFC Smart Pantries, and AI Receipt Scanning!
-And we added the live data stream card to HASS as well.
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=DonTranQuiL&repository=grocy-pro&category=integration)
+[![Open your Home Assistant instance and start setting up Grocy Pro.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=grocy_pro)
 
-[![Latest Release](https://img.shields.io/github/v/release/DonTranQuiL/grocy-pro?style=for-the-badge&color=007ec6)](https://github.com/DonTranQuiL/grocy-pro/releases)
-[![License](https://img.shields.io/github/license/DonTranQuiL/grocy-pro?style=for-the-badge&color=007ec6)](https://github.com/DonTranQuiL/grocy-pro/blob/main/LICENSE)
-[![Home Assistant CI](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/hass-ci.yml?label=Home%20Assistant%20CI&style=for-the-badge)](https://github.com/DonTranQuiL/grocy-pro/actions/workflows/hass-ci.yml)
-[![Code Checks](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/codechecker.yml?style=for-the-badge&label=CODE%20CHECKS&color=5dbb0f)](https://github.com/DonTranQuiL/grocy-pro/actions)
-[![Tests](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/pytest.yml?style=for-the-badge&label=TESTS&color=5dbb0f)](https://github.com/DonTranQuiL/grocy-pro/actions)
-[![HACS Validation](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/hacs.yaml?style=for-the-badge&label=HACS%20VALIDATION&color=5dbb0f)](https://github.com/DonTranQuiL/grocy-pro/actions)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-5dbb0f?style=for-the-badge)](https://github.com/pre-commit/pre-commit)
-[![Ruff](https://img.shields.io/badge/code%20style-ruff-000000?style=for-the-badge)](https://github.com/astral-sh/ruff)
-[![HACS Custom](https://img.shields.io/badge/HACS-CUSTOM-ff6e27?style=for-the-badge)](https://hacs.xyz/)
-[![Home Assistant Version](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-007ec6?style=for-the-badge)](https://www.home-assistant.io/)
-[![Maintainer](https://img.shields.io/badge/maintainer-%40DonTranQuiL-007ec6?style=for-the-badge)](https://github.com/DonTranQuiL)
-[![Donate](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-ffdd00?style=for-the-badge)](https://ko-fi.com/DonTranQuiL)
-[![Community Forum](https://img.shields.io/badge/community-forum-007ec6?style=for-the-badge)](https://community.home-assistant.io/t/ads-b-tracker-for-home-assistant/1011081)
-[![Discord](https://img.shields.io/badge/Discord-join%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/qaHPTTKHae)
+[![GitHub release](https://img.shields.io/github/v/release/DonTranQuiL/grocy-pro?style=for-the-badge&color=ffb52e&include_prereleases)](https://github.com/DonTranQuiL/grocy-pro/releases)
+[![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5?style=for-the-badge&logo=homeassistantcommunitystore&logoColor=white)](https://hacs.xyz)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.4%2B-18BCF2?style=for-the-badge&logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
+[![Grocy](https://img.shields.io/badge/Grocy-4.x-46e1ff?style=for-the-badge)](https://grocy.info)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
+[![Tests](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/pytest.yml?style=flat-square&label=tests)](https://github.com/DonTranQuiL/grocy-pro/actions/workflows/pytest.yml)
+[![Home Assistant CI](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/hass-ci.yml?style=flat-square&label=HA%20CI)](https://github.com/DonTranQuiL/grocy-pro/actions/workflows/hass-ci.yml)
+[![hassfest](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/hassfest.yaml?style=flat-square&label=hassfest)](https://github.com/DonTranQuiL/grocy-pro/actions/workflows/hassfest.yaml)
+[![HACS validation](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/hacs.yaml?style=flat-square&label=HACS%20validation)](https://github.com/DonTranQuiL/grocy-pro/actions/workflows/hacs.yaml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/grocy-pro/codeql.yml?style=flat-square&label=CodeQL)](https://github.com/DonTranQuiL/grocy-pro/actions/workflows/codeql.yml)
+[![Ruff](https://img.shields.io/badge/code%20style-ruff-000000?style=flat-square)](https://github.com/astral-sh/ruff)
+[![Discord](https://img.shields.io/badge/Discord-join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/qaHPTTKHae)
+[![Ko-fi](https://img.shields.io/badge/buy%20me%20a%20coffee-ko--fi-ff5e5b?style=flat-square&logo=kofi&logoColor=white)](https://ko-fi.com/DonTranQuiL)
+
+[Install](#installation) · [Upgrading from 2.x](#upgrading-from-2x-the-grocy-domain) · [Entities](#entities) · [Actions](#actions) · [Dashboard card](#dashboard-card) · [Examples](#automation-examples) · [Troubleshooting](#troubleshooting) · [Docs site](https://dontranquil.github.io/grocy-pro/)
 
 </div>
 
-### 🚀 High-Performance Home Inventory Management
-Stop digging through nested Home Assistant menus to check off your chores or throw away expired food. This overhauled integration pulls your entire household state—Food, Tasks, Chores, Shopping Lists, and Batteries—into a single, actionable ecosystem powered by a rock-solid Python backend and a beautifully designed, blazing-fast JavaScript frontend.
+## Highlights
 
----
+| | |
+| --- | --- |
+| 🥫 **Stock at a glance** | Everything in stock, plus binary sensors for products that are expiring, overdue, expired or below their minimum stock. |
+| 🛒 **Shopping list as a to-do list** | Check items off in the supermarket, add products by name, remove items. Works with Assist and the to-do card. |
+| 🧹 **Chores, tasks and batteries** | Counts with the full lists as attributes, and "overdue" binary sensors for automations. |
+| 📅 **Calendar** | Grocy's own calendar (due products, chores, tasks, batteries, meal plan) as a Home Assistant calendar. |
+| ⚡ **13 actions** | Purchase, consume, open, track chores and batteries, complete tasks, consume recipes, manage the shopping list, edit any Grocy object, and add a whole receipt by product name. |
+| 🃏 **Dashboard card included** | The Grocy Pro Command Center card loads automatically. No resource to add. |
+| 🪶 **Light on your server** | Polls Grocy's cheap "database changed" endpoint every 30 s and only downloads data when something changed (or every 5 minutes so due dates roll over). |
+| 🔐 **Clean setup** | UI setup with connection check, re-authentication when the API key stops working, reconfigure, diagnostics with the key and URL redacted. |
+| 🇳🇱 **English and Dutch** | The UI and actions are translated into both. |
 
-## 🌟 Core Features & Architecture
+## Installation
 
-### ⚡ The "Optimistic UI" Engine (Grocy Command Center)
-Standard Home Assistant dashboards suffer from "Polling Lag"—you click a button, the backend processes it, but the UI doesn't update for 30 seconds until the next polling cycle. 
-Included in this repository is the **Grocy Command Center** custom Lovelace card. It utilizes a custom **Optimistic Execution Cache**. When you click "Done" on a chore or "Consume" on a food item, the card intercepts the action, fires the payload to the server, and **instantly hides the item from your screen**, adjusting your total counts in real-time. It feels like a blazing-fast native mobile app.
+### HACS (recommended)
 
-### 🛡️ Bulletproof Backend Architecture
-The legacy Grocy integration suffered from aggressive polling crashes and `async_add_executor_job` keyword exceptions that would lock up the UI. We have rewritten the core execution handlers:
-* **Zero-Crash Coordinators:** Missing entity arrays have been patched to ensure the Home Assistant data-loop never panics during rapid state changes.
-* **Safe Service Wrappers:** All native Grocy API calls (`open_product`, `remove_product_in_shopping_list`) have been encapsulated in safe Python wrappers, completely eliminating `<Response [400]>` and `TabError` crashes.
+Click **Open in HACS** above, or add the repository yourself:
 
-### 🤖 AI Receipt Vision (The "Magic" Feature)
-Nobody wants to manually type in 40 items after a grocery run. We have engineered a brand new service endpoint (`grocy.add_products_by_name`) that allows native LLMs (like Google Gemini 1.5 Flash or OpenAI) to restock your fridge automatically.
-1. Tap the HA Assist microphone or snap a photo of your receipt.
-2. The AI extracts the items, quantities, and prices.
-3. The custom backend performs a fuzzy-search against your Grocy database, resolves the string names to exact `product_id` integers, and quietly stocks your digital fridge.
+1. HACS → ⋮ → **Custom repositories**
+2. URL: `https://github.com/DonTranQuiL/grocy-pro`, category **Integration**
+3. Download **Grocy Pro**, then restart Home Assistant
 
-### 🏷️ Native NFC / RFID "Smart Pantry" Workflows
-Turn your physical house into a smart database. Slap cheap NFC sticker tags on your dog food bin, coffee machine, or trash cans. Tap your phone to a bin and Home Assistant automatically triggers `grocy.consume_product_from_stock` and ticks off your daily chores.
+### Manual
 
-### 🧹 Real-Time Zero-Bloat Entity Cleanup
-The dashboard intelligently sorts your life into actionable lists:
-* **Overdue/Action Required:** Items that need immediate attention (Red).
-* **Pantry:** Food approaching its best-before date (Consume / Waste / Open).
-* **Tasks & Chores:** Household management with 1-click completion.
-* **Shopping Cart:** Direct integration to remove items as you walk through the supermarket aisles.
+Copy `custom_components/grocy_pro` to `/config/custom_components/` and restart Home Assistant.
 
----
+## Configuration
 
-## 📥 Installation Guide
+1. In Grocy, create an API key: **Settings (wrench) → Manage API keys → Add**.
+2. In Home Assistant: **Settings → Devices & services → Add integration → Grocy Pro** (or the **Add integration** button above).
+3. Fill in:
 
-This God-Tier overhaul requires installing both the **Backend Integration** and the **Frontend Dashboard Card**.
+| Field | Example | Notes |
+| --- | --- | --- |
+| URL | `http://192.168.1.10` or `https://grocy.example.com/grocy` | Include `http://` or `https://`. A port or sub path in the URL is fine. |
+| API key | | From step 1. |
+| Port | `9192` | The Grocy add-on uses 9192. Behind a reverse proxy use 443 (or 80). Ignored when the URL already has a port. |
+| Verify SSL certificate | off | Turn on when Grocy has a valid HTTPS certificate. |
 
-### Part 1: Install the Backend (via HACS)
-1. Open **HACS** in your sidebar and navigate into the **Integrations** panel.
-2. Click the three dots (`...`) located in the upper right quadrant and select **Custom repositories**.
-3. Input the repository web link: `https://github.com/DonTranQuiL/Grocy`
-4. Set the Category selector dropdown to **Integration** and hit **Add**.
-5. Locate the newly added **Grocy** repository card and hit **Download**.
-6. ⚠️ **Restart your Home Assistant instance** to load the patched Python backend.
+Grocy Pro checks the connection before saving. Change it later with entry → ⋮ → **Reconfigure**.
 
-### Part 2: Install the Frontend (Grocy Command Center)
-1. Inside this repository, locate the `grocy-action-card.js` file.
-2. Copy this file into your Home Assistant `/config/www/` directory.
-3. In Home Assistant, navigate to **Settings > Dashboards > Click the 3 dots in the top right > Resources**.
-4. Click **Add Resource**.
-5. Set the URL to `/local/grocy-action-card.js` and set the Resource Type to **JavaScript Module**.
-6. Refresh your browser cache (`Ctrl + Shift + R`).
+> [!TIP]
+> Using the **Grocy add-on**? Open the add-on's **Configuration** tab and enter `9192` under **Network** to expose the API port, then use `http://<your HA IP>` with port `9192`.
 
----
+Only one Grocy server can be added. Entities for features you've turned off in Grocy (for example batteries or the calendar) are not created.
 
-## 📍 Interactive Dashboard Configuration OVERHAUL!!! ADDED LIVE DATA STREAM
+## Upgrading from 2.x (the `grocy` domain)
 
-To deploy the Command Center to your dashboard, simply use the visual editor, select "Manual Card", and paste the following YAML. *(Tip: Use the new 'Sections', 'Panel', or 'Sidebar' view layout in HA to let this card stretch out beautifully!)*
+Up to 2.x this repository installed into `custom_components/grocy` with the domain `grocy`. That is the same folder and domain as the original [custom-components/grocy](https://github.com/custom-components/grocy) integration, which HACS has since removed from its default list. Because of that, HACS kept showing **"Repository removed from HACS / The repository owner has removed it"** for your installation, even though this repository is alive and yours.
+
+3.0 gives the integration its own domain, **`grocy_pro`**, so it can never be mixed up with the old one again.
+
+1. **Update Grocy Pro** in HACS to 3.0 and restart Home Assistant. The new code goes to `custom_components/grocy_pro`.
+2. **Settings → Devices & services → Add integration → Grocy Pro.** Grocy Pro sees your old Grocy setup and offers **Move my old Grocy setup**. Pick it: Grocy Pro reuses the URL and API key, removes the old Grocy entry and sets itself up.
+3. **Remove the old repository from HACS.** Find the entry HACS flags as removed (*Grocy*, repository `custom-components/grocy`) and choose **Remove**. This deletes the old `custom_components/grocy` folder. If the folder is still there afterwards, delete it yourself.
+4. **Restart Home Assistant** once more. The "removed" repair is gone.
+5. **Update your automations and scripts**: actions are now called `grocy_pro.*` instead of `grocy.*` (search and replace `grocy.` → `grocy_pro.` in your action calls).
+6. **Remove the old card resource**: if you added `/local/grocy-action-card.js` under **Settings → Dashboards → Resources**, delete it and the file in `/config/www/`. The card now comes with the integration. Your `type: custom:grocy-action-card` cards keep working.
+
+What stays the same:
+
+- **Entity IDs.** The device is still called *Grocy*, so you get `sensor.grocy_stock`, `binary_sensor.grocy_overdue_chores` and so on again, with their history. (Step 2 removes the old entities first so the IDs are free.) The one exception is the to-do list, which is now `todo.grocy_shopping_list` instead of `todo.grocy_grocy_shopping_list`.
+- **Attributes** used by the card and templates (`products`, `chores`, `tasks`, `meals`, ...).
+
+Skipped step 2 and set Grocy Pro up manually? Then delete the old Grocy entry, and rename any entities that ended up with a `_2` suffix.
+
+## Entities
+
+All entities belong to the **Grocy** device.
+
+| Entity | ID | State | Attributes |
+| --- | --- | --- | --- |
+| Stock | `sensor.grocy_stock` | Products in stock | `products` (name, amount, best before, picture URL, ...) |
+| Shopping list | `sensor.grocy_shopping_list` | Items on the list | `products` |
+| Chores | `sensor.grocy_chores` | Chores | `chores` (name, next execution, assigned user, ...) |
+| Tasks | `sensor.grocy_tasks` | Open tasks | `tasks` |
+| Batteries | `sensor.grocy_batteries` | Batteries | `batteries` |
+| Meal plan | `sensor.grocy_meal_plan` | Planned meals from today | `meals` (with recipe and picture URL) |
+| Expiring products | `binary_sensor.grocy_expiring_products` | On if any product is due soon | `expiring_products`, `count` |
+| Overdue products | `binary_sensor.grocy_overdue_products` | On if any product is past its due date | `overdue_products`, `count` |
+| Expired products | `binary_sensor.grocy_expired_products` | On if any product is expired | `expired_products`, `count` |
+| Missing products | `binary_sensor.grocy_missing_products` | On if any product is below its minimum stock | `missing_products`, `count` |
+| Overdue chores | `binary_sensor.grocy_overdue_chores` | On if a chore is overdue | `overdue_chores`, `count` |
+| Overdue tasks | `binary_sensor.grocy_overdue_tasks` | On if a task is overdue | `overdue_tasks`, `count` |
+| Overdue batteries | `binary_sensor.grocy_overdue_batteries` | On if a battery needs charging | `overdue_batteries`, `count` |
+| Shopping list | `todo.grocy_shopping_list` | Items still to buy | |
+| Calendar | `calendar.grocy_calendar` | Next event | |
+
+The lists are not recorded in the database (only the counts are), so they don't bloat your history. Product and recipe pictures are served through Home Assistant at `/api/grocy_pro/...`, so they also work outside your home network.
+
+## Actions
+
+| Action | What it does | Main fields |
+| --- | --- | --- |
+| `grocy_pro.add_product_to_stock` | Purchase: add stock | `product_id`, `amount`, `price` |
+| `grocy_pro.consume_product_from_stock` | Consume or waste stock | `product_id`, `amount`, `spoiled`, `transaction_type` |
+| `grocy_pro.open_product` | Mark stock as opened | `product_id`, `amount` |
+| `grocy_pro.add_products_by_name` | Add several products by name, e.g. from a receipt | `items: [{name, amount, price}]` |
+| `grocy_pro.execute_chore` | Track a chore | `chore_id`, `done_by`, `track_execution_now`, `skipped` |
+| `grocy_pro.complete_task` | Complete a task | `task_id` |
+| `grocy_pro.track_battery` | Track a battery charge | `battery_id` |
+| `grocy_pro.consume_recipe` | Consume all ingredients of a recipe | `recipe_id` |
+| `grocy_pro.add_missing_products_to_shopping_list` | Put everything below minimum stock on a list | `list_id` |
+| `grocy_pro.remove_product_in_shopping_list` | Remove a product from a list | `product_id`, `list_id`, `amount` |
+| `grocy_pro.add_generic` | Create any Grocy object | `entity_type`, `data` |
+| `grocy_pro.update_generic` | Edit any Grocy object | `entity_type`, `object_id`, `data` |
+| `grocy_pro.delete_generic` | Delete any Grocy object | `entity_type`, `object_id` |
+
+The IDs are the numbers in Grocy's URLs (for example `.../product/12`) and in the entity attributes. `add_products_by_name` matches names case-insensitively and also accepts a name that uniquely contains (or is contained in) one product name. Names it can't match are skipped and reported in the error.
+
+Chores are tracked at their scheduled time by default (like the original integration). Set `track_execution_now: true` to track them now.
+
+## Dashboard card
+
+The **Grocy Pro Command Center** card shows overdue items, your pantry by location, tasks, chores and the shopping list, with one-tap buttons (done, consume, open, waste, charge, remove). It's loaded automatically by the integration and appears in the card picker.
 
 ```yaml
 type: custom:grocy-action-card
-layout_options:
-  grid_columns: 3
+# Optional:
+locations:          # Grocy location IDs -> names (defaults: 1 Pantry, 2 Fridge, 3 Freezer, 4 Cupboards)
+  1: Pantry
+  5: Garage
+entity_prefix: grocy  # if you renamed the entities, e.g. sensor.kitchen_stock -> kitchen
+domain: grocy_pro     # action domain, only change it for testing
 ```
 
-<img width="763" height="597" alt="NEWCARD" src="https://github.com/user-attachments/assets/e43e3036-4584-451c-ab66-989d559f6599" />
+Use a **Sections** or **Panel** view to give the card room. It hides items right after you tap them and the data refreshes immediately after each action.
 
+## Automation examples
 
-### Advanced UI Customization
-The card dynamically adapts its Grid layout. If viewed on a narrow mobile phone, the buttons will safely wrap to prevent cut-offs. If viewed on a wide wall-mounted tablet, the statistics grid and action buttons expand horizontally to fill the space perfectly.
-
-### 📱 Advanced Workflows & Automations
-NFC "Smart Pantry" Template
-Want to build an NFC tap-to-consume workflow? Use this native Home Assistant automation template to instantly execute multiple backend commands with a single physical tap:
+Tap an NFC tag to feed the dog and tick off the chore:
 
 ```yaml
-alias: "Grocy: NFC Tap - Feed the Dogs"
-mode: single
-trigger:
-  - platform: tag
-    tag_id: "YOUR_SCANNED_TAG_ID_HERE"
-action:
-  # Action 1: Consume 1 portion of Dog Food from Grocy
-  - service: grocy.consume_product_from_stock
-    data:
-      product_id: 42 
-      amount: 1
-      transaction_type: CONSUME
-      
-  # Action 2: Check off the Morning Chore
-  - service: grocy.execute_chore
-    data:
-      chore_id: 15
+automation:
+  - alias: "Grocy: NFC tap - feed the dog"
+    triggers:
+      - trigger: tag
+        tag_id: YOUR_TAG_ID
+    actions:
+      - action: grocy_pro.consume_product_from_stock
+        data:
+          product_id: 42
+          amount: 1
+      - action: grocy_pro.execute_chore
+        data:
+          chore_id: 15
+          track_execution_now: true
 ```
 
-## AI Receipt Scanner Script
-To utilize the AI Vision features, create this script in Home Assistant and pass an image helper to your AI model of choice:
+Morning notification when something expires:
 
 ```yaml
-alias: "Grocy: Process Receipt with AI"
-icon: mdi:receipt-text-scan
-mode: single
-sequence:
-  - action: google_generative_ai_conversation.generate_content
-    data:
-      prompt: >
-        Read this grocery receipt. Extract the items purchased, their quantities, and the prices. 
-        Return ONLY a raw, valid JSON object matching this exact schema:
-        {"items": [{"name": "Item Name", "amount": 1.0, "price": "2.99"}]}
-        Do not include markdown blocks, backticks, or conversational text. Return ONLY the JSON.
-      image_entity_id: image.receipt_scanner
-    response_variable: ai_response
-    
-  - action: grocy.add_products_by_name
-    data: "{{ ai_response.text | from_json }}"
+automation:
+  - alias: "Grocy: expiring food"
+    triggers:
+      - trigger: time
+        at: "08:00:00"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.grocy_expiring_products
+        state: "on"
+    actions:
+      - action: notify.mobile_app_your_phone
+        data:
+          title: "🥫 Use these soon"
+          message: >
+            {{ state_attr('binary_sensor.grocy_expiring_products', 'expiring_products')
+               | map(attribute='name') | join(', ') }}
 ```
 
-### 🙏 Credits
-Massive thanks to the developers of the original Home Assistant grocy-py custom component. This overhaul and frontend card was designed to patch, polish, and push their excellent initial API wrapper to the absolute limit of what is possible in Home Assistant.
+Add a receipt with an AI model (any AI task / generate content integration that returns JSON):
+
+```yaml
+script:
+  grocy_receipt:
+    alias: "Grocy: add receipt"
+    sequence:
+      - action: google_generative_ai_conversation.generate_content
+        data:
+          prompt: >
+            Read this grocery receipt. Return ONLY JSON like
+            {"items": [{"name": "Milk", "amount": 2, "price": 1.29}]}.
+            Use these product names where possible:
+            {{ state_attr('sensor.grocy_stock', 'products') | map(attribute='name') | join(', ') }}
+          filenames:
+            - /media/receipt.jpg
+        response_variable: ai
+      - action: grocy_pro.add_products_by_name
+        data: "{{ ai.text | from_json }}"
+```
+
+Put everything below minimum stock on the shopping list every Saturday:
+
+```yaml
+automation:
+  - alias: "Grocy: weekly shopping list"
+    triggers:
+      - trigger: time
+        at: "09:00:00"
+    conditions:
+      - condition: time
+        weekday: sat
+    actions:
+      - action: grocy_pro.add_missing_products_to_shopping_list
+```
+
+## How it works
+
+Grocy Pro talks to the [Grocy REST API](https://demo.grocy.info/api) through [grocy-py](https://github.com/iamkarlson/grocy-py):
+
+- Every 30 s it asks `/system/db-changed-time`. Only when that changes (or after 5 minutes) it downloads stock, the volatile stock (one call for expiring, overdue, expired and missing products), the shopping list, chores, tasks, batteries and the meal plan.
+- The calendar is read from Grocy's iCal feed every 15 minutes.
+- After every action the data is refreshed straight away.
+
+A daily [API watcher](.github/workflows/ai-feed-watcher.yml) runs the same calls against the public [Grocy demo](https://demo.grocy.info) (always the latest Grocy release) and opens an issue if a new Grocy version breaks something.
+
+## Troubleshooting
+
+| Problem | Fix |
+| --- | --- |
+| HACS says *"Repository removed from HACS"* / *"The owner has removed it"* | That message is about the custom-components/grocy entry HACS still has on record, not this repository. Follow [Upgrading from 2.x](#upgrading-from-2x-the-grocy-domain) and remove that entry in HACS. |
+| *Cannot reach Grocy* | Check the URL and port from Home Assistant's point of view. For the add-on, expose port 9192 (see the tip above). |
+| *That address answered, but not like a Grocy server* | Wrong port or sub path, or a login page in front of Grocy. Open `<url>:<port>/api/system/info` in a browser: it should show JSON. |
+| *Grocy rejected the API key* / re-authenticate | Create a new API key in Grocy and enter it. |
+| Some entities are missing | The matching feature is turned off in Grocy (`FEATURE_FLAG_*` in Grocy's config). |
+| Entities have a `_2` suffix | The old `grocy` entities still existed. See the last paragraph of the upgrade section. |
+| Card shows *Custom element doesn't exist* | Hard-refresh the browser (Ctrl+Shift+R). If you still have the old `/local/grocy-action-card.js` resource, remove it. |
+| Times in the calendar are off by your UTC offset | Set Grocy's timezone (the `TZ` / PHP timezone of the Grocy container) to your local zone. |
+
+Debug logs:
+
+```yaml
+logger:
+  logs:
+    custom_components.grocy_pro: debug
+    grocy: debug
+```
+
+Or download diagnostics from the entry (the API key and URL are redacted).
+
+## Related repositories
+
+- **[grocy-rewrite](https://github.com/DonTranQuiL/grocy-rewrite)** was an earlier work-in-progress rewrite (it still uses the old `grocy` domain). Grocy Pro 3.0 is the maintained version; don't install both.
+- **[custom-components/grocy](https://github.com/custom-components/grocy)** is the original integration this project started from. It is no longer in the HACS default list.
+
+## Credits
+
+- [Grocy](https://grocy.info) by Bernd Bestel: "ERP beyond your fridge"
+- [grocy-py](https://github.com/iamkarlson/grocy-py) by George Green (iamkarlson) and contributors (MIT), the Python client underneath
+- The original Home Assistant integration [custom-components/grocy](https://github.com/custom-components/grocy) and its maintained fork [iamkarlson/grocy](https://github.com/iamkarlson/grocy) (Apache-2.0), whose entity model and service names Grocy Pro keeps for compatibility. See [NOTICE](NOTICE).
+- Built and maintained by [DonTranQuiL](https://github.com/DonTranQuiL)
+
+## Support
+
+- Docs: [dontranquil.github.io/grocy-pro](https://dontranquil.github.io/grocy-pro/)
+- Issues: [GitHub Issues](https://github.com/DonTranQuiL/grocy-pro/issues)
+- Community: [Discord](https://discord.gg/qaHPTTKHae)
+- Tip jar: [Ko-fi](https://ko-fi.com/DonTranQuiL)
+
+## License
+
+MIT, see [LICENSE](LICENSE). Parts derived from Apache-2.0 projects are credited in [NOTICE](NOTICE).

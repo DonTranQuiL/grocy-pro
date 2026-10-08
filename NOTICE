@@ -1,0 +1,24 @@
+Grocy Pro
+Copyright (c) 2026 DonTranQuiL
+Licensed under the MIT License (see LICENSE).
+
+This project started as a fork of, and keeps the entity model, attribute names
+and action (service) names of, the following Apache-2.0 licensed projects:
+
+  custom-components/grocy - https://github.com/custom-components/grocy
+  iamkarlson/grocy        - https://github.com/iamkarlson/grocy
+  Copyright the custom-components/grocy and iamkarlson/grocy contributors.
+  Licensed under the Apache License, Version 2.0:
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Version 3.0 is a rewrite. Files that still contain material derived from those
+projects (entity descriptions in sensor.py and binary_sensor.py, services.yaml
+field names, the ProductWrapper/MealPlanItemWrapper picture helpers) are
+provided under the Apache License 2.0 terms for that material, and are modified
+from the originals.
+
+Runtime dependency (not bundled): grocy-py - https://github.com/iamkarlson/grocy-py
+(MIT License).
+
+Grocy itself (https://grocy.info) is by Bernd Bestel and licensed under the MIT
+License. Grocy Pro is not affiliated with the Grocy project.

@@ -3,1301 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrocyPro: The God-Tier Home Assistant Overhaul</title>
-    
-    <!-- Fonts & Core Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Three.js CDN for Interactive 3D Particles Background -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Tailwind CSS Engine -->
+    <title>Grocy Pro | Home Assistant</title>
+    <meta name="description" content="Grocy Pro: your Grocy stock, shopping list, chores, tasks, batteries, meal plan and calendar in Home Assistant, with actions and a one-tap dashboard card.">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#0B1120">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Grocy Pro: Grocy for Home Assistant">
+    <meta property="og:description" content="Stock and due dates, the shopping list as a to-do list, chores, tasks, batteries, meal plan and calendar. 13 actions and a dashboard card.">
+    <meta property="og:url" content="https://dontranquil.github.io/grocy-pro/">
+    <meta property="og:image" content="https://dontranquil.github.io/grocy-pro/images/banner.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://dontranquil.github.io/grocy-pro/images/banner.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            DEFAULT: '#0284c7', // Sky Blue
-                            light: '#38bdf8',
-                            dark: '#0369a1',
-                            emerald: '#10b981',
-                            darkemerald: '#047857',
-                            purple: '#8b5cf6',
-                            darkpurple: '#6d28d9',
-                            darker: '#090d16'
-                        }
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
     </script>
-    
     <style>
-        body {
-            background-color: #050811;
-            overflow-x: hidden;
-        }
-        
-        /* Premium Glowing Glassmorphic Elements */
-        .glass-card {
-            background: rgba(10, 15, 30, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        .glass-card-interactive {
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .glass-card-interactive:hover {
-            transform: translateY(-2px);
-            border-color: rgba(56, 189, 248, 0.25);
-            box-shadow: 0 12px 40px 0 rgba(3, 105, 161, 0.15);
-        }
-
-        /* Ambient Glow Shadows */
-        .glow-box-sky {
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
-        }
-
-        .glow-box-emerald {
-            box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
-        }
-
-        .glow-box-purple {
-            box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
-        }
-
-        /* Sparkle Animation for Action Feedback */
-        .sparkle {
-            position: absolute;
-            background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 1;
-            animation: explode 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-        }
-
-        @keyframes explode {
-            0% {
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(calc(-50% + var(--mx)), calc(-50% + var(--my))) scale(1);
-                opacity: 0;
-            }
-        }
-
-        /* Custom Sliding Toasts animation */
-        @keyframes slideInUp {
-            0% {
-                transform: translateY(100px) scale(0.9);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-        }
-
-        .toast-enter {
-            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* Technical Line grid styling */
-        .grid-cyber {
-            background-size: 40px 40px;
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-        }
-        
-        /* Hide scrollbars but keep functionality */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="text-gray-100 font-sans tracking-tight antialiased selection:bg-brand selection:text-white grid-cyber">
+<body class="bg-[#0B1120] text-slate-200 font-sans selection:bg-amber-500/30 overflow-x-hidden">
 
-    <div id="webgl-background" class="fixed inset-0 z-0 pointer-events-none opacity-60"></div>
-
-    <!-- Background decorative glows -->
-    <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-dark/20 blur-[120px] pointer-events-none"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-brand-purple/10 blur-[120px] pointer-events-none"></div>
-
-    <header id="navbar" class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050811]/70 backdrop-blur-md transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-dark to-brand-light flex items-center justify-center shadow-lg shadow-brand/20">
-                    <i class="fa-solid fa-cart-shopping text-white text-sm"></i>
-                </div>
-                <div>
-                    <span class="text-sm font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">GROCY<span class="text-brand-light">PRO</span></span>
-                    <span class="text-[9px] block text-brand-light font-mono -mt-1 tracking-widest uppercase">v2.0.0 Stable</span>
-                </div>
-            </div>
-            
-            <nav class="hidden md:flex items-center gap-6 text-xs font-semibold text-gray-400">
-                <a href="#simulator" class="hover:text-white transition-colors">Interactive Demo</a>
-                <a href="#comparison" class="hover:text-white transition-colors">Before & After</a>
-                <a href="#architecture" class="hover:text-white transition-colors">Wiki Deep-Dive</a>
-                <a href="#features" class="hover:text-white transition-colors">Core Features</a>
-                <a href="#installation" class="hover:text-white transition-colors">Installation</a>
-                <a href="#automations" class="hover:text-white transition-colors">YAML Templates</a>
-            </nav>
-
-            <div class="flex items-center gap-3">
-                <a href="https://github.com/DonTranQuiL/grocy-pro" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-xs font-bold transition-all flex items-center gap-2">
-                    <i class="fa-brands fa-github text-sm"></i> GitHub Repository
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-[#0B1120]/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="https://dontranquil.github.io/" class="flex items-center gap-2 text-white font-bold text-xl tracking-wide">
+                <img src="icon.png" alt="" class="w-7 h-7 rounded-lg">
+                Grocy Pro <span class="text-amber-400 font-light">for HA</span>
+            </a>
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
+                <a href="#entities" class="hover:text-white transition-colors">Entities</a>
+                <a href="#actions" class="hover:text-white transition-colors">Actions</a>
+                <a href="#upgrade" class="hover:text-white transition-colors">Upgrading</a>
+                <a href="#installation" class="hover:text-white transition-colors">Install</a>
+                <a href="https://discord.gg/qaHPTTKHae" target="_blank" class="hover:text-white transition-colors">Discord</a>
+                <a href="https://github.com/DonTranQuiL/grocy-pro" target="_blank" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-full transition-all">
+                    <i data-lucide="github" class="w-4 h-4"></i> GitHub
                 </a>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-
-        <section class="text-center max-w-4xl mx-auto mb-20">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand/20 bg-brand/5 text-brand-light text-xs font-bold mb-6 glow-box-sky">
-                <span class="w-2 h-2 rounded-full bg-brand-light animate-pulse"></span>
-                GrocyPro v2.0.0 Stable Rewrite
+    <section class="relative pt-32 pb-20 lg:pt-44 lg:pb-24 overflow-hidden">
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
+            <img src="icon.png" alt="Grocy Pro" class="w-28 h-28 mx-auto mb-8 rounded-3xl drop-shadow-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-900/30 border border-amber-500/30 text-amber-300 text-sm font-medium mb-6">
+                Grocy for Home Assistant
             </div>
-            
-            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-none mb-6">
-                The God-Tier Overhaul for <br>
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-light to-brand-purple">Home Assistant Inventory</span>
-            </h1>
-            
-            <p class="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed mb-8">
-                An ultra-responsive, zero-latency, AI-powered inventory engine and interactive Lovelace dashboard component. Free your smart home system from outdated blocking cycles.
-            </p>
-
-            <!-- Metadata Badges Showcase -->
-            <div class="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-8 opacity-90">
-                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-code-branch text-brand-light"></i> HACS-COMPATIBLE</span>
-                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-shield text-brand-emerald"></i> ZERO-LOCK EVENT LOOPS</span>
-                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-brain text-brand-purple"></i> AI FUZZY RESOLVER</span>
-                <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 font-mono text-[10px] flex items-center gap-1.5"><i class="fa-solid fa-wave-square text-amber-500"></i> ASYNC COORDINATOR</span>
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6">Your pantry,<br>on your dashboard.</h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">Stock and due dates, the shopping list as a to-do list, chores, tasks, batteries, the meal plan and Grocy's calendar. Book purchases and chores from automations, or with one tap on the included card.</p>
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=DonTranQuiL&amp;repository=grocy-pro&amp;category=integration" class="px-6 py-3 rounded-full bg-amber-600 hover:bg-amber-500 text-white font-semibold inline-flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Open in HACS</a>
+                <a href="#upgrade" class="px-6 py-3 rounded-full border border-cyan-500/50 text-cyan-200 hover:border-cyan-300">Upgrading from 2.x?</a>
+                <a href="https://github.com/DonTranQuiL/grocy-pro/releases" class="px-6 py-3 rounded-full border border-slate-600 text-slate-200 hover:border-slate-400">Releases</a>
             </div>
-
-            <div class="flex flex-wrap justify-center gap-3">
-                <a href="#simulator" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-dark hover:from-brand-light hover:to-brand text-xs font-bold transition-all shadow-lg shadow-brand/20 flex items-center gap-2">
-                    Try Dashboard Simulator <i class="fa-solid fa-arrow-right"></i>
-                </a>
-                <a href="#installation" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-xs font-bold transition-all">
-                    Installation Steps
-                </a>
+            <div class="mt-12 flex flex-wrap justify-center gap-3 text-sm">
+                <span class="px-4 py-1.5 rounded-full border border-amber-400/60 bg-amber-400/10 text-amber-300 font-semibold">Stock + due dates</span>
+                <span class="px-4 py-1.5 rounded-full border border-amber-400/60 bg-amber-400/10 text-amber-300 font-semibold">Shopping list to-do</span>
+                <span class="px-4 py-1.5 rounded-full border border-cyan-400/60 bg-cyan-400/10 text-cyan-300 font-semibold">Chores, tasks, batteries</span>
+                <span class="px-4 py-1.5 rounded-full border border-cyan-400/60 bg-cyan-400/10 text-cyan-300 font-semibold">Calendar + actions</span>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="simulator" class="mb-24 scroll-mt-20">
-            <div class="text-center max-w-2xl mx-auto mb-10">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Experience "Optimistic UI" Live</h2>
-                <p class="text-xs text-gray-400 mt-2">
-                    Interact directly with this virtual dashboard card. Toggle engine modes to observe the speed difference.
-                </p>
+    <section id="features" class="py-20 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">What you get</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">One Grocy device with sensors, binary sensors, a to-do list and a calendar. Only the features you use in Grocy show up.</p>
             </div>
-
-            <!-- Dashboard Frame Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
-                <!-- Lovelace Card Panel (Left side) -->
-                <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-white/10 glow-box-sky relative overflow-hidden">
-                    
-                    <!-- Card Header -->
-                    <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="p-1.5 rounded-lg bg-brand/10 text-brand-light text-xs"><i class="fa-solid fa-sliders"></i></span>
-                            <div>
-                                <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">GROCY COMMAND CENTER</h4>
-                                <p class="text-[9px] text-gray-500 font-mono">LOVELACE CUSTOM COMPONENT</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Statistics Mini Grid -->
-                        <div class="flex gap-4">
-                            <div class="text-right">
-                                <span class="text-[10px] text-gray-500 block uppercase font-bold">In Stock</span>
-                                <span id="badge-stock" class="text-xs font-mono font-bold text-brand-light">0</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] text-gray-500 block uppercase font-bold">Alerts</span>
-                                <span id="badge-expired" class="text-xs font-mono font-bold text-amber-400">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Interactive Engine Mode Selectors -->
-                    <div class="mb-6 p-4 rounded-xl bg-[#090d16] border border-white/5">
-                        <span class="text-[10px] text-gray-400 block font-bold mb-2 uppercase tracking-widest">Select Intercept Engine Mode</span>
-                        <div class="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-lg">
-                            <button id="mode-optimistic" class="py-2 text-xs font-bold rounded-md transition-all bg-brand text-white shadow-md shadow-brand/20" onclick="setSimMode('optimistic')">
-                                ⚡ Optimistic UI Engine
-                            </button>
-                            <button id="mode-legacy" class="py-2 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all" onclick="setSimMode('legacy')">
-                                🐌 Legacy Polling Sync
-                            </button>
-                        </div>
-                        <p id="mode-desc" class="text-[10px] text-gray-400 mt-3 leading-normal font-mono">
-                            <strong>⚡ Optimistic Mode:</strong> Click any action and it takes place instantly. UI components update without waiting for database confirmation responses.
-                        </p>
-                    </div>
-
-                    <!-- Sub-Grids: Pantry Stock & Chores -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
-                        <!-- Pantry Column -->
-                        <div>
-                            <h5 class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-2 flex items-center justify-between">
-                                <span>Pantry Tracker</span>
-                                <span class="px-1.5 py-0.5 rounded bg-brand/10 text-brand-light text-[8px]">Auto-sort</span>
-                            </h5>
-                            
-                            <div id="pantry-container" class="space-y-2">
-                                <!-- Dynamic Render -->
-                            </div>
-                        </div>
-
-                        <!-- Chores Column -->
-                        <div>
-                            <h5 class="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider mb-2 flex items-center justify-between">
-                                <span>Household Chores</span>
-                                <span class="px-1.5 py-0.5 rounded bg-brand-emerald/10 text-brand-emerald text-[8px]">Actionable</span>
-                            </h5>
-                            
-                            <div id="chores-container" class="space-y-2">
-                                <!-- Dynamic Render -->
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- Hardware Interaction Simulators -->
-                    <div class="mt-6 border-t border-white/5 pt-4">
-                        <span class="text-[10px] text-gray-400 block font-bold mb-3 uppercase tracking-widest">Simulate Hardware Interactions</span>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button class="p-2.5 rounded-lg border border-brand/20 hover:border-brand bg-brand/5 hover:bg-brand/10 text-xs font-bold text-brand-light transition-all flex items-center justify-center gap-1.5" onclick="triggerNFC('dog_food', 'nfc-01')">
-                                <i class="fa-solid fa-tag"></i> Tap NFC tag
-                            </button>
-                            <button class="p-2.5 rounded-lg border border-brand-emerald/20 hover:border-brand-emerald bg-brand-emerald/5 hover:bg-brand-emerald/10 text-xs font-bold text-brand-emerald transition-all flex items-center justify-center gap-1.5" onclick="runAIReceiptVision()">
-                                <i class="fa-solid fa-receipt"></i> Scan Receipt
-                            </button>
-                            <button class="p-2.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5" onclick="resetSimulationData()">
-                                <i class="fa-solid fa-rotate-right"></i> Reset Simulation
-                            </button>
-                        </div>
-                    </div>
-
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="package" class="text-amber-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Stock at a glance</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Everything in stock with amounts, best-before dates and pictures, plus alerts for expiring, overdue, expired and missing products.</p>
                 </div>
-
-                <!-- Real-time Terminal Log (Right side) -->
-                <div class="lg:col-span-5 flex flex-col h-full self-stretch">
-                    <div class="glass-card rounded-2xl border border-white/10 overflow-hidden flex flex-col h-full bg-[#04070e] glow-box-emerald flex-1">
-                        
-                        <!-- Terminal Bar -->
-                        <div class="px-4 py-2.5 border-b border-white/5 flex items-center justify-between bg-brand-darker/50">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
-                                <span class="text-[10px] text-gray-500 font-mono ml-2">Home Assistant Dev Log Console</span>
-                            </div>
-                            <div class="w-2 h-2 rounded-full bg-brand-emerald animate-ping"></div>
-                        </div>
-
-                        <!-- Console Output body -->
-                        <div id="sim-terminal" class="p-4 font-mono text-[10px] leading-relaxed text-gray-300 overflow-y-auto h-[350px] flex-1">
-                            <div><span class="text-brand-light">[SYSTEM INITIALIZING]</span> Safe service coordinators and DB pools online.</div>
-                            <div><span class="text-brand-emerald">[READY]</span> Waiting for interaction execution calls...</div>
-                        </div>
-                    </div>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="shopping-cart" class="text-amber-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Shopping list to-do</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Tick items off in the supermarket, add products by name, or ask Assist. It's a regular Home Assistant to-do list.</p>
                 </div>
-
-            </div>
-        </section>
-
-        <section id="comparison" class="mb-24 scroll-mt-20">
-            <div class="text-center max-w-2xl mx-auto mb-12">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">The Overhaul Realized</h2>
-                <p class="text-xs text-gray-400 mt-2">
-                    Standard integrations fail under high-traffic actions. Look at what happens when synchronization stalls.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-                
-                <!-- Legacy Card -->
-                <div class="glass-card rounded-2xl border border-red-500/10 p-6 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold">THE LEGACY STATE</span>
-                            <span class="text-xs text-gray-500">Unpatched execution handlers</span>
-                        </div>
-                        <h4 class="text-lg font-bold text-white mb-2">Uncaught Timeout and Asset Errors</h4>
-                        <p class="text-xs text-gray-400 leading-relaxed mb-6">
-                            Frequent synchronous REST queries and unpatched background worker queues caused continuous loop blocking, leading to broken dashboard components, lockouts, and severe entity synchronization errors.
-                        </p>
-                    </div>
-
-                    <!-- Visual before integration error tracking asset -->
-                    <div class="rounded-xl border border-white/5 bg-black/40 overflow-hidden relative group p-4">
-                        <img src="{A13FF018-D6E8-4187-AB40-A0D0B16D42DF}.png" alt="Broken Legacy Integration Example" class="w-full h-auto object-contain rounded border border-white/10 group-hover:scale-[1.01] transition-all" onerror="this.src='https://placehold.co/800x120/0a0f1d/ff3333?text=Broken+Assets+and+Unstable+API+Connection+State';">
-                        <div class="absolute inset-0 bg-red-950/20 pointer-events-none flex items-center justify-center">
-                            <span class="text-[10px] font-mono text-red-400 bg-red-950/80 px-2.5 py-1 rounded border border-red-500/30">Asset Timeout Stack Trace Error</span>
-                        </div>
-                    </div>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="sparkles" class="text-amber-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Chores, tasks, batteries</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Counts with full lists, and "overdue" binary sensors that make reminder automations a one-liner.</p>
                 </div>
-
-                <!-- Overhauled Card -->
-                <div class="glass-card rounded-2xl border border-brand-emerald/10 p-6 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-2 py-0.5 rounded bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-[10px] font-bold">THE NEW OVERHAUL</span>
-                            <span class="text-xs text-gray-500">Bulletproof UI Pipeline</span>
-                        </div>
-                        <h4 class="text-lg font-bold text-white mb-2">Optimistic Sync & AI Automation</h4>
-                        <p class="text-xs text-gray-400 leading-relaxed mb-6">
-                            The patched Python platform introduces non-blocking transaction states, allowing safe, lightning-fast UI modifications and background REST queries without lockouts.
-                        </p>
-                    </div>
-
-                    <div class="rounded-xl border border-brand-emerald/15 bg-gradient-to-br from-[#09151e] to-[#040811] overflow-hidden p-6 flex flex-col justify-center items-center gap-3">
-                        <i class="fa-solid fa-shield-halved text-brand-emerald text-4xl animate-bounce"></i>
-                        <div class="text-center">
-                            <span class="text-xs text-white font-bold block">100% Non-Blocking Sync</span>
-                            <span class="text-[10px] text-gray-500 block font-mono">0ms Main Thread Latency Lockups</span>
-                        </div>
-                    </div>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="calendar-days" class="text-amber-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Calendar</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Grocy's calendar (due products, chores, tasks, batteries and meals) in the Home Assistant calendar view.</p>
                 </div>
-
-            </div>
-        </section>
-
-        <section id="architecture" class="mb-24 scroll-mt-20">
-            <div class="text-center max-w-2xl mx-auto mb-10">
-                <span class="text-xs font-bold text-brand-light font-mono uppercase tracking-widest block mb-2">Technical Documentation</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">How the Overhaul Works</h2>
-                <p class="text-xs text-gray-400 mt-2">
-                    A technical breakdown of the rewrite architecture, custom asynchronous schedulers, and machine-learning ingestion pipelines.
-                </p>
-            </div>
-
-            <!-- Tabbed Interface -->
-            <div class="glass-card rounded-2xl border border-white/5 overflow-hidden">
-                <!-- Navigation Tabs -->
-                <div class="flex border-b border-white/5 bg-white/[0.02] overflow-x-auto no-scrollbar">
-                    <button id="tab-btn-backend" class="px-5 py-4 text-xs font-extrabold text-white border-b-2 border-brand flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('backend')">
-                        <i class="fa-solid fa-server text-brand-light"></i> Backend Refactor
-                    </button>
-                    <button id="tab-btn-ai" class="px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('ai')">
-                        <i class="fa-solid fa-brain text-brand-purple"></i> AI Vision Resolvers
-                    </button>
-                    <button id="tab-btn-nfc" class="px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('nfc')">
-                        <i class="fa-solid fa-tag text-brand-emerald"></i> Physical NFC Triggers
-                    </button>
-                    <button id="tab-btn-lovelace" class="px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all" onclick="switchWikiTab('lovelace')">
-                        <i class="fa-solid fa-sliders text-amber-500"></i> Optimistic UI Engine
-                    </button>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="layout-dashboard" class="text-amber-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Command Center card</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Overdue items, pantry by location, chores, tasks and the shopping list with one-tap buttons. Loaded automatically.</p>
                 </div>
-
-                <!-- Tab Panels -->
-                <div class="p-6 sm:p-8">
-                    <!-- Tab Panel: Backend -->
-                    <div id="tab-panel-backend" class="space-y-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
-                                    <span class="p-1.5 rounded bg-brand/10 text-brand-light"><i class="fa-solid fa-server"></i></span>
-                                    Core Execution Handler Re-engineering
-                                </h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    The legacy Home Assistant Grocy components relied heavily on unbuffered executor tasks (`async_add_executor_job`) executed directly within the main Home Assistant update loop. Under rapid dashboard interactions, this spawned excessive concurrent operations, locking up SQL pools and causing the event loop to panic.
-                                </p>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    <strong>GrocyPro</strong> completely rewrites this interface by introducing safe asynchronous event coordinators, buffering incoming transactions, and wrapping API mutations inside safe Python REST wrappers.
-                                </p>
-                                <ul class="space-y-2 text-xs text-gray-300">
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> Safe wrappers stop <code>TabError</code> or <code>Response [400]</code> exceptions.</li>
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> Data-corruptions prevent database locks.</li>
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> Safe asynchronous coordinators eliminate execution freezes.</li>
-                                </ul>
-                            </div>
-                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5">
-                                <span class="text-[10px] text-gray-500 block font-mono mb-2">REWRITE SPECIFICATIONS // CORE STACK</span>
-                                <div class="space-y-4 font-mono text-xs">
-                                    <div class="flex justify-between border-b border-white/5 pb-2">
-                                        <span class="text-gray-400">Threading Model:</span>
-                                        <span class="text-brand-light">Non-blocking Asynchronous</span>
-                                    </div>
-                                    <div class="flex justify-between border-b border-white/5 pb-2">
-                                        <span class="text-gray-400">Worker Coordinator:</span>
-                                        <span class="text-brand-light">Concurrent Update Cache</span>
-                                    </div>
-                                    <div class="flex justify-between border-b border-white/5 pb-2">
-                                        <span class="text-gray-400">Maximum Polling Overhead:</span>
-                                        <span class="text-brand-emerald">0ms Blocking Main Thread</span>
-                                    </div>
-                                    <div class="flex justify-between border-b border-white/5 pb-2">
-                                        <span class="text-gray-400">Session Handshake Policy:</span>
-                                        <span class="text-brand-light">Persistent Keep-Alive Connection</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-400">Failover Recoveries:</span>
-                                        <span class="text-brand-light">Automatic 5-Second Retrograde Sync</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Panel: AI (Hidden initially) -->
-                    <div id="tab-panel-ai" class="hidden space-y-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
-                                    <span class="p-1.5 rounded bg-brand-purple/10 text-brand-purple"><i class="fa-solid fa-brain"></i></span>
-                                    Fuzzy-Match Receipt Processing Architecture
-                                </h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    Standard receipt parsers merely convert images to unstructured text blocks. The GrocyPro rewrite introduces the `grocy.add_products_by_name` AI automation endpoint, capable of mapping arbitrary conversational strings to exact database primary keys.
-                                </p>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    The custom backend executes a fast-fuzzy matching sequence over database product arrays. For instance, when the AI model outputs `"Gala Apple (Bag)"`, the backend resolves this to the target primary key `product_id: 104` instantly.
-                                </p>
-                                <div class="bg-brand-purple/5 border border-brand-purple/15 rounded-xl p-4">
-                                    <h5 class="text-xs font-bold text-white mb-2">Ingestion Pipeline Map:</h5>
-                                    <div class="flex items-center gap-2 text-[10px] font-mono text-gray-400">
-                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5">1. Receipt Pic</span>
-                                        <i class="fa-solid fa-arrow-right text-brand-purple"></i>
-                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5">2. LLM Parser</span>
-                                        <i class="fa-solid fa-arrow-right text-brand-purple"></i>
-                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5">3. Fuzzy Resolver</span>
-                                        <i class="fa-solid fa-arrow-right text-brand-purple"></i>
-                                        <span class="px-2 py-1 rounded bg-[#090d16] border border-white/5 text-brand-emerald">4. Fridge Populated</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5 flex flex-col justify-center">
-                                <span class="text-[10px] text-gray-500 block font-mono mb-2">AI RESOLUTION TRACE SIMULATION</span>
-                                <div class="font-mono text-[10px] space-y-2 text-gray-300">
-                                    <div><span class="text-brand-purple">[AI_PARSE]</span> Found: "Milk Whole Organics (1 Gal)" x 1</div>
-                                    <div><span class="text-yellow-500">[FUZZY_MATCHING]</span> Running search on: "Milk Whole Organics (1 Gal)"</div>
-                                    <div><span class="text-yellow-500">[FUZZY_MATCHING]</span> Matches found: "Whole Milk" (Score: 88%)</div>
-                                    <div><span class="text-brand-emerald">[RESOLVED]</span> Assigned "Milk Whole Organics" -> ID 42</div>
-                                    <div><span class="text-brand-emerald">[DB_SYNC]</span> Executed `grocy.add_product_to_stock {product_id: 42, amount: 1}`</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Panel: NFC (Hidden initially) -->
-                    <div id="tab-panel-nfc" class="hidden space-y-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
-                                    <span class="p-1.5 rounded bg-brand-emerald/10 text-brand-emerald"><i class="fa-solid fa-tag"></i></span>
-                                    Ultra-Low Latency Smart Pantries
-                                </h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    By placing NFC/RFID microchips directly on pantry containers and storage zones, you can eliminate manual item lookup workflows entirely. Tapping a tag automatically routes transactions to your local database backend.
-                                </p>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    This overhaul implements safe concurrent script execution handlers inside Home Assistant. This allows users to associate single taps with complex actions, such as consuming raw resources while clearing corresponding task items simultaneously.
-                                </p>
-                                <div class="grid grid-cols-2 gap-3 text-center">
-                                    <div class="p-3 rounded-lg border border-white/5 bg-white/[0.01]">
-                                        <span class="text-brand-emerald font-mono font-bold block text-lg">42ms</span>
-                                        <span class="text-[9px] text-gray-500 block uppercase">NFC Processing Lag</span>
-                                    </div>
-                                    <div class="p-3 rounded-lg border border-white/5 bg-white/[0.01]">
-                                        <span class="text-brand-emerald font-mono font-bold block text-lg">100%</span>
-                                        <span class="text-[9px] text-gray-500 block uppercase">Automation Success</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5 flex flex-col justify-between">
-                                <h5 class="text-xs font-bold text-white mb-2">Recommended Setup Guidelines:</h5>
-                                <ol class="space-y-2 text-[11px] text-gray-400 list-decimal pl-4">
-                                    <li>Install 13.56MHz NFC NTAG213 labels on pantry shelves.</li>
-                                    <li>Scan raw tag inside standard Home Assistant Mobile App interface.</li>
-                                    <li>Construct YAML automation utilizing the templates below.</li>
-                                    <li>Mount physical tags safely out of high moisture zones.</li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Panel: Lovelace (Hidden initially) -->
-                    <div id="tab-panel-lovelace" class="hidden space-y-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
-                                    <span class="p-1.5 rounded bg-amber-500/10 text-amber-500"><i class="fa-solid fa-sliders"></i></span>
-                                    Designing the "Optimistic UI" Frontend Card
-                                </h4>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    Lovelace frontend dashboards traditionally fetch card updates solely after database transaction confirmations. Over weak home server network connections, this creates noticeable performance lag.
-                                </p>
-                                <p class="text-xs text-gray-400 leading-relaxed">
-                                    <strong>Optimistic UI Design</strong> changes this layout. The dashboard card displays successful operations instantly, modifying counts locally and dispatching REST actions in the background. If a background transaction fails, the card performs a rollback to match the system's exact state.
-                                </p>
-                                <div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-                                    <p class="text-[10px] font-mono text-amber-400 leading-normal">
-                                        <i class="fa-solid fa-bolt"></i> <strong>Performance Advantage:</strong> Average click feedback drops from 3200ms (legacy synchronous polling wait times) to a rapid <strong>15ms</strong> cache operation.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="bg-[#04070e] p-5 rounded-xl border border-white/5 flex flex-col justify-center items-center">
-                                <span class="text-[10px] text-gray-500 block font-mono mb-2">LATENCY COMPARISON CHART</span>
-                                <div class="space-y-3 w-full">
-                                    <div>
-                                        <div class="flex justify-between text-[9px] font-mono mb-1 text-red-400">
-                                            <span>Legacy Polling Sync wait: 3200ms</span>
-                                        </div>
-                                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                            <div class="bg-red-500 h-full rounded-full w-[90%]"></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between text-[9px] font-mono mb-1 text-brand-emerald">
-                                            <span>Optimistic Cache Action feedback: 15ms</span>
-                                        </div>
-                                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                            <div class="bg-brand-emerald h-full rounded-full w-[3%]"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="feather" class="text-amber-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Light on Grocy</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">A tiny "has anything changed?" check every 30 seconds. Data is only downloaded when Grocy says something changed.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="features" class="mb-24 scroll-mt-20">
-            <div class="text-center max-w-2xl mx-auto mb-12">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Overhaul Capabilities</h2>
-                <p class="text-xs text-gray-400 mt-2">
-                    Every piece of code has been completely updated to achieve high performance.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <!-- Feature 1 -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-6 border border-white/5">
-                    <span class="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand-light text-base mb-4">
-                        <i class="fa-solid fa-bolt"></i>
-                    </span>
-                    <h4 class="text-sm font-extrabold text-white mb-2">Optimistic Actions</h4>
-                    <p class="text-xs text-gray-400 leading-normal">
-                        Deducts stock metrics and completes tasks in real-time, removing visual blocks before database transactions complete.
-                    </p>
+    <section id="entities" class="py-20 bg-slate-900/40 border-y border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-start">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Entities you get</h2>
+                <p class="text-slate-400 mb-6">All on the <span class="font-mono text-slate-300">Grocy</span> device. The lists are attributes and aren't written to your history database.</p>
+                <div class="rounded-2xl border border-slate-700 bg-[#0d1326] p-6">
+                    <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">sensor.grocy_stock</dt><dd class="text-white text-right">products in stock</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">sensor.grocy_shopping_list</dt><dd class="text-white text-right">items on the list</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">sensor.grocy_chores / _tasks / _batteries</dt><dd class="text-white text-right">counts + lists</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">sensor.grocy_meal_plan</dt><dd class="text-white text-right">meals from today</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">binary_sensor.grocy_*_products</dt><dd class="text-white text-right">expiring, overdue, expired, missing</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">binary_sensor.grocy_overdue_*</dt><dd class="text-white text-right">chores, tasks, batteries</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs sm:text-sm">todo.grocy_shopping_list</dt><dd class="text-white text-right">the shopping list</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-slate-400 font-mono text-xs sm:text-sm">calendar.grocy_calendar</dt><dd class="text-white text-right">Grocy's calendar</dd></div>
+                    </dl>
                 </div>
-
-                <!-- Feature 2 -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-6 border border-white/5">
-                    <span class="w-10 h-10 rounded-xl bg-brand-emerald/10 border border-brand-emerald/20 flex items-center justify-center text-brand-emerald text-base mb-4">
-                        <i class="fa-solid fa-robot"></i>
-                    </span>
-                    <h4 class="text-sm font-extrabold text-white mb-2">AI Receipt Vision</h4>
-                    <p class="text-xs text-gray-400 leading-normal">
-                        Fuzzy match strings extracted via large language models to inventory entity keys automatically.
-                    </p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-6 border border-white/5">
-                    <span class="w-10 h-10 rounded-xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purple text-base mb-4">
-                        <i class="fa-solid fa-nfc-directional"></i>
-                    </span>
-                    <h4 class="text-sm font-extrabold text-white mb-2">Native NFC Triggers</h4>
-                    <p class="text-xs text-gray-400 leading-normal">
-                        Execute automatic stock reduction states concurrently using physical sticker interfaces on pantry bins.
-                    </p>
-                </div>
-
             </div>
-        </section>
-
-        <section id="installation" class="mb-24 scroll-mt-20">
-            <div class="text-center max-w-2xl mx-auto mb-12">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Quick Installation Guide</h2>
-                <p class="text-xs text-gray-400 mt-2">
-                    Follow these step-by-step procedures to fully integrate the new dashboard elements.
-                </p>
+            <div id="actions" class="rounded-2xl border border-slate-700 bg-[#0d1326] p-6">
+                <p class="text-xs font-mono text-slate-500 mb-3">Actions (grocy_pro.*)</p>
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs">add_product_to_stock · consume · open</dt><dd class="text-white text-right">stock bookings</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs">add_products_by_name</dt><dd class="text-white text-right">a whole receipt at once</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs">execute_chore · complete_task · track_battery</dt><dd class="text-white text-right">household</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs">consume_recipe</dt><dd class="text-white text-right">all ingredients</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400 font-mono text-xs">add_missing_… · remove_product_in_shopping_list</dt><dd class="text-white text-right">shopping lists</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-slate-400 font-mono text-xs">add_generic · update_generic · delete_generic</dt><dd class="text-white text-right">any Grocy object</dd></div>
+                </dl>
+                <pre class="mt-6 rounded-xl bg-[#0B1120] border border-slate-700 p-4 text-xs text-slate-300 overflow-x-auto"><code>triggers:
+  - trigger: tag
+    tag_id: dog_food_bin
+actions:
+  - action: grocy_pro.consume_product_from_stock
+    data: { product_id: 42, amount: 1 }
+  - action: grocy_pro.execute_chore
+    data: { chore_id: 15, track_execution_now: true }</code></pre>
+                <p class="text-xs text-slate-500 mt-5">A daily watcher runs the same API calls against the public Grocy demo and opens an issue if a new Grocy release breaks something.</p>
             </div>
+        </div>
+    </section>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                
-                <!-- Part 1 -->
-                <div class="glass-card rounded-2xl p-6 border border-white/5">
-                    <div class="flex items-center gap-3 border-b border-white/5 pb-4 mb-4">
-                        <span class="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 text-brand-light font-extrabold text-xs flex items-center justify-center">1</span>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Part 1: Backend Setup</h4>
-                            <p class="text-[9px] text-gray-500 uppercase font-mono">Home Assistant Custom Integrations</p>
-                        </div>
-                    </div>
+    <section id="upgrade" class="py-20">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="rounded-2xl border border-amber-500/30 bg-amber-900/10 p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-3 flex items-center gap-2"><i data-lucide="circle-arrow-up" class="text-amber-400"></i> Upgrading from 2.x</h2>
+                <p class="text-sm text-slate-300 mb-5">2.x used the domain <code class="text-amber-300">grocy</code> and the folder <code class="text-amber-300">custom_components/grocy</code>, the same as the original custom-components/grocy integration that HACS removed from its list. That's why HACS kept saying the repository was removed. 3.0 has its own domain, <code class="text-amber-300">grocy_pro</code>.</p>
+                <ol class="space-y-3 text-sm text-slate-300 list-decimal list-inside">
+                    <li>Update Grocy Pro in HACS and restart.</li>
+                    <li>Add integration → Grocy Pro → <span class="text-white font-semibold">Move my old Grocy setup</span>. It reuses your URL and API key, removes the old entry and keeps your <code class="text-amber-300">sensor.grocy_*</code> entity IDs and history.</li>
+                    <li>In HACS, remove the entry flagged as removed (<span class="font-mono">custom-components/grocy</span>). Delete <code class="text-amber-300">custom_components/grocy</code> if it's still there. Restart.</li>
+                    <li>Change <code class="text-amber-300">grocy.*</code> to <code class="text-amber-300">grocy_pro.*</code> in automations and scripts.</li>
+                    <li>Remove the old <code class="text-amber-300">/local/grocy-action-card.js</code> dashboard resource: the card now comes with the integration.</li>
+                </ol>
+            </div>
+        </div>
+    </section>
 
-                    <ol class="space-y-4 text-xs text-gray-300">
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-light font-mono">•</span>
-                            <span>Open your <strong>HACS Interface</strong> in the side navigation panel.</span>
-                        </li>
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-light font-mono">•</span>
-                            <div>
-                                <span>Click the 3 dots menu in the upper right, choose <strong>Custom Repositories</strong>, and add:</span>
-                                <div class="mt-2 flex items-center gap-2 bg-[#090d16] border border-white/5 p-2 rounded-lg font-mono text-[10px] text-brand-light">
-                                    <span class="flex-1 truncate select-all">https://github.com/DonTranQuiL/Grocy</span>
-                                    <button class="px-2 py-0.5 rounded bg-brand/10 hover:bg-brand text-white border border-brand/20 transition-all text-[8px]" onclick="copySnippet('hacs-repo')">Copy URL</button>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-light font-mono">•</span>
-                            <span>Set the dropdown classification selector to **Integration** and click install.</span>
-                        </li>
-                        <li class="flex gap-2.5">
-                            <span class="text-red-400 font-mono">⚠️</span>
-                            <span class="text-red-300 font-bold">Restart your Home Assistant instance to load the updated Python structures.</span>
-                        </li>
+    <section id="installation" class="py-24 bg-slate-900/40 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Installation</h2>
+                <p class="text-slate-400">HACS, a restart, and a Grocy API key.</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">HACS</h3>
+                    <ol class="space-y-4 text-sm text-slate-300">
+                        <li>1. Click <a class="text-amber-300 hover:underline" href="https://my.home-assistant.io/redirect/hacs_repository/?owner=DonTranQuiL&amp;repository=grocy-pro&amp;category=integration">Open in HACS</a>, or add <code class="text-amber-300">https://github.com/DonTranQuiL/grocy-pro</code> as a custom repository (category Integration).</li>
+                        <li>2. Download Grocy Pro and restart Home Assistant.</li>
+                        <li>3. In Grocy: Settings → Manage API keys → Add.</li>
+                        <li>4. Settings → Devices &amp; services → Add integration → Grocy Pro, then enter the URL, API key and port (9192 for the add-on).</li>
                     </ol>
                 </div>
-
-                <!-- Part 2 -->
-                <div class="glass-card rounded-2xl p-6 border border-white/5">
-                    <div class="flex items-center gap-3 border-b border-white/5 pb-4 mb-4">
-                        <span class="w-8 h-8 rounded-full bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald font-extrabold text-xs flex items-center justify-center">2</span>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Part 2: Lovelace Configuration</h4>
-                            <p class="text-[9px] text-gray-500 uppercase font-mono">Dashboard JavaScript module deployment</p>
-                        </div>
-                    </div>
-
-                    <ol class="space-y-4 text-xs text-gray-300">
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-emerald font-mono">•</span>
-                            <div>
-                                <span>Copy your custom `grocy-action-card.js` script to the HA config directory:</span>
-                                <div class="mt-2 flex items-center gap-2 bg-[#090d16] border border-white/5 p-2 rounded-lg font-mono text-[10px] text-brand-emerald">
-                                    <span class="flex-1 truncate select-all">/config/www/grocy-action-card.js</span>
-                                    <button class="px-2 py-0.5 rounded bg-brand-emerald/10 hover:bg-brand-emerald text-white border border-brand-emerald/20 transition-all text-[8px]" onclick="copySnippet('card-path')">Copy Path</button>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-emerald font-mono">•</span>
-                            <span>Navigate to <strong>Settings > Dashboards > Resources</strong> in HA.</span>
-                        </li>
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-emerald font-mono">•</span>
-                            <span>Create a new Resource element, configure the locator field as `/local/grocy-action-card.js`, and label it as a **JavaScript Module**.</span>
-                        </li>
-                        <li class="flex gap-2.5">
-                            <span class="text-brand-emerald font-mono">•</span>
-                            <span>Flush browser storage cache (`Ctrl + Shift + R`) to update standard asset pointers.</span>
-                        </li>
-                    </ol>
+                <div class="rounded-2xl border border-cyan-500/30 bg-cyan-900/10 p-8">
+                    <h3 class="text-xl font-bold text-white mb-3">Dashboard card</h3>
+                    <pre class="rounded-xl bg-[#0B1120] border border-slate-700 p-4 text-xs text-slate-300 overflow-x-auto mb-4"><code>type: custom:grocy-action-card
+locations:
+  1: Pantry
+  2: Fridge</code></pre>
+                    <p class="text-sm text-slate-400">Full docs, examples (NFC tags, AI receipts, reminders) and troubleshooting are in the <a class="text-amber-300 hover:underline" href="https://github.com/DonTranQuiL/grocy-pro#readme">README</a>.</p>
                 </div>
-
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="automations" class="mb-24 scroll-mt-20">
-            <div class="text-center max-w-2xl mx-auto mb-12">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Dashboard Integration Blueprints</h2>
-                <p class="text-xs text-gray-400 mt-2">
-                    Copy and deploy these production-ready configurations into your Home Assistant installation.
-                </p>
+    <footer class="bg-[#050810] border-t border-slate-800 py-12 text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8">
+            <div>
+                <div class="flex items-center gap-2 text-slate-300 font-bold text-lg mb-3">
+                    <img src="icon.png" alt="" class="w-6 h-6 rounded-md"> Grocy Pro
+                </div>
+                <p class="max-w-md mb-3">Maintained by DonTranQuiL. Unofficial. Not affiliated with the Grocy project.</p>
+                <p>Built on <a class="hover:text-white underline" href="https://grocy.info">Grocy</a> by Bernd Bestel and <a class="hover:text-white underline" href="https://github.com/iamkarlson/grocy-py">grocy-py</a>. Started from the Apache-2.0 <a class="hover:text-white underline" href="https://github.com/custom-components/grocy">custom-components/grocy</a> integration.</p>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Lovelace Card Config -->
-                <div class="glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
-                            <span class="text-xs font-extrabold text-white font-mono flex items-center gap-1.5"><i class="fa-solid fa-table-columns text-brand-light"></i> LOVELACE YAML</span>
-                            <button class="px-2 py-1 rounded bg-white/5 hover:bg-brand text-gray-300 hover:text-white transition-all text-[9px] font-bold" onclick="copyCodeBlock('code-card-config')">Copy Config</button>
-                        </div>
-                        <pre id="code-card-config" class="text-[9px] text-gray-300 font-mono bg-[#04070e] p-3 rounded-xl overflow-x-auto border border-white/5 leading-normal">
-type: custom:grocy-action-card
-layout_options:
-  grid_columns: 3</pre>
-                    </div>
-                </div>
-
-                <!-- NFC Automation Template -->
-                <div class="glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
-                            <span class="text-xs font-extrabold text-white font-mono flex items-center gap-1.5"><i class="fa-solid fa-nfc-directional text-brand-purple"></i> NFC SMART PANTRY</span>
-                            <button class="px-2 py-1 rounded bg-white/5 hover:bg-brand-purple text-gray-300 hover:text-white transition-all text-[9px] font-bold" onclick="copyCodeBlock('code-nfc-config')">Copy Config</button>
-                        </div>
-                        <pre id="code-nfc-config" class="text-[9px] text-gray-300 font-mono bg-[#04070e] p-3 rounded-xl overflow-x-auto border border-white/5 leading-normal">
-alias: "Grocy: NFC Tap - Feed Dogs"
-mode: single
-trigger:
-  - platform: tag
-    tag_id: "YOUR_NFC_TAG_HEX"
-action:
-  - service: grocy.consume_product_from_stock
-    data:
-      product_id: 42 
-      amount: 1
-      transaction_type: CONSUME
-  - service: grocy.execute_chore
-    data:
-      chore_id: 15</pre>
-                    </div>
-                </div>
-
-                <!-- AI Vision Blueprint -->
-                <div class="glass-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
-                            <span class="text-xs font-extrabold text-white font-mono flex items-center gap-1.5"><i class="fa-solid fa-microchip-ai text-brand-emerald"></i> AI SCANNER SCRIPT</span>
-                            <button class="px-2 py-1 rounded bg-white/5 hover:bg-brand-emerald text-gray-300 hover:text-white transition-all text-[9px] font-bold" onclick="copyCodeBlock('code-ai-config')">Copy Config</button>
-                        </div>
-                        <pre id="code-ai-config" class="text-[9px] text-gray-300 font-mono bg-[#04070e] p-3 rounded-xl overflow-x-auto border border-white/5 leading-normal">
-alias: "Grocy: Process with AI"
-icon: mdi:receipt-text-scan
-mode: single
-sequence:
-  - action: google_generative_ai_conversation.generate_content
-    data:
-      prompt: >
-        Read this grocery receipt. Extract the items purchased, their quantities, and the prices. 
-        Return ONLY a raw, valid JSON object matching this exact schema:
-        {"items": [{"name": "Item Name", "amount": 1.0, "price": "2.99"}]}
-        Do not include markdown blocks, backticks, or conversational text. Return ONLY the JSON.
-      image_entity_id: image.receipt_scanner
-    response_variable: ai_response
-  - action: grocy.add_products_by_name
-    data: "{{ ai_response.text | from_json }}"</pre>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-    </main>
-
-    <footer class="border-t border-white/5 bg-[#03050b] py-12 relative z-10 text-xs text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-md bg-gradient-to-tr from-brand-dark to-brand-light flex items-center justify-center">
-                    <i class="fa-solid fa-cart-shopping text-white text-[10px]"></i>
-                </div>
-                <span class="text-xs font-extrabold text-white">GROCY<span class="text-brand-light">PRO</span></span>
-            </div>
-            
-            <p>© 2026 GrocyPro Overhaul Project. Maintained by @DonTranQuiL. Released under the MIT License.</p>
-            
-            <div class="flex items-center gap-4">
-                <a href="https://ko-fi.com/DonTranQuiL" target="_blank" class="hover:text-white transition-colors text-yellow-400 font-bold flex items-center gap-1">
-                    <i class="fa-solid fa-mug-hot"></i> Donate
-                </a>
+            <div class="md:text-right space-y-2">
+                <p><a class="hover:text-white" href="https://github.com/DonTranQuiL/grocy-pro">Repository</a></p>
+                <p><a class="hover:text-white" href="https://github.com/DonTranQuiL/grocy-pro/issues">Issues</a></p>
+                <p><a class="hover:text-white" href="https://discord.gg/qaHPTTKHae">Discord</a></p>
+                <p><a class="hover:text-white" href="https://ko-fi.com/DonTranQuiL">Ko-fi</a></p>
+                <p><a class="hover:text-white" href="https://dontranquil.github.io/">All integrations</a></p>
+                <p class="pt-2">MIT · <a class="hover:text-white" href="https://github.com/DonTranQuiL/grocy-pro/blob/main/NOTICE">NOTICE</a></p>
             </div>
         </div>
     </footer>
 
-    <!-- Absolute Toast container -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
-
     <script>
-        // Core Database Registers for Lovelace Simulator
-        let currentEngineMode = 'optimistic'; // 'optimistic' or 'legacy'
-        let pantryItems = [
-            { id: 'item-milk', name: 'Fresh Whole Milk', details: 'Expires in 2 days', type: 'expiring', count: 1, base: 1, metric: 'L' },
-            { id: 'item-avocado', name: 'Avocado Bag', details: 'Expires today!', type: 'expired', count: 1, base: 1, metric: 'qty' },
-            { id: 'item-yogurt', name: 'Greek Yogurt Pack', details: 'Expires in 5 days', type: 'normal', count: 4, base: 4, metric: 'qty' },
-            { id: 'item-eggs', name: 'Organic Dozen Eggs', details: 'Expires in 12 days', type: 'normal', count: 1, base: 1, metric: 'qty' }
-        ];
-
-        let choreItems = [
-            { id: 'chore-dog', name: 'Feed the Dogs', schedule: 'Morning schedule', completed: false, baseId: 12 },
-            { id: 'chore-trash', name: 'Take out Trash Bin', schedule: 'Weekly schedule', completed: false, baseId: 15 }
-        ];
-
-        // Renders active lists inside interactive dashboard mock frame
-        function updateDashboardUI() {
-            const pantryContainer = document.getElementById('pantry-container');
-            const choresContainer = document.getElementById('chores-container');
-            
-            if (!pantryContainer || !choresContainer) return; // Prevent DOM initialization crashes
-
-            // Calculate active badge limits
-            const expiredCount = pantryItems.filter(i => i.type === 'expired' || i.type === 'expiring').length + choreItems.filter(c => !c.completed).length;
-            const activeStockCount = pantryItems.reduce((acc, curr) => acc + curr.count, 0);
-
-            document.getElementById('badge-expired').innerText = expiredCount;
-            document.getElementById('badge-stock').innerText = activeStockCount;
-
-            // Render Pantry Items
-            pantryContainer.innerHTML = '';
-            if (pantryItems.length === 0) {
-                pantryContainer.innerHTML = `<div class="p-6 text-center text-gray-500 text-xs font-mono border border-dashed border-white/5 rounded-xl">Pantry stock empty. Trigger scan receipt image to restock.</div>`;
-            } else {
-                pantryItems.forEach(item => {
-                    let borderClass = 'border-white/5 bg-white/[0.01]';
-                    let textAccent = 'text-gray-400';
-                    if (item.type === 'expired') {
-                        borderClass = 'border-red-500/20 bg-red-950/5';
-                        textAccent = 'text-red-400 font-semibold';
-                    } else if (item.type === 'expiring') {
-                        borderClass = 'border-amber-500/20 bg-amber-950/5';
-                        textAccent = 'text-amber-400';
-                    }
-
-                    pantryContainer.innerHTML += `
-                        <div id="${item.id}" class="p-3 rounded-xl border ${borderClass} flex items-center justify-between transition-all duration-300 relative overflow-hidden group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 text-xs font-mono">
-                                    ${item.count}${item.metric}
-                                </div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-white leading-tight">${item.name}</h5>
-                                    <span class="text-[10px] ${textAccent} leading-normal block">${item.details}</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                                <button class="px-2 py-1 rounded bg-brand/10 hover:bg-brand text-brand-light hover:text-white border border-brand/20 text-[10px] font-bold transition-all flex items-center gap-1" onclick="consumeProduct('${item.id}', event)">
-                                    <span class="spinner hidden mr-1"><i class="fa-solid fa-circle-notch animate-spin"></i></span>
-                                    Consume
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            // Render Chore Items
-            choresContainer.innerHTML = '';
-            const activeChores = choreItems.filter(c => !c.completed);
-            if (activeChores.length === 0) {
-                choresContainer.innerHTML = `<div class="p-6 text-center text-brand-emerald text-xs font-mono border border-dashed border-brand-emerald/10 rounded-xl bg-brand-emerald/5"><i class="fa-solid fa-circle-check"></i> All household chores cleared!</div>`;
-            } else {
-                activeChores.forEach(chore => {
-                    choresContainer.innerHTML += `
-                        <div id="${chore.id}" class="p-3 rounded-xl border border-white/5 bg-white/[0.01] flex items-center justify-between transition-all duration-300 group">
-                            <div>
-                                <h5 class="text-xs font-bold text-white leading-tight">${chore.name}</h5>
-                                <span class="text-[10px] text-gray-500 leading-normal block">${chore.schedule}</span>
-                            </div>
-                            <button class="px-2 py-1 rounded bg-brand-emerald/10 hover:bg-brand-emerald text-brand-emerald hover:text-white border border-brand-emerald/20 text-[10px] font-bold transition-all flex items-center gap-1" onclick="completeChore('${chore.id}', event)">
-                                <span class="spinner hidden mr-1"><i class="fa-solid fa-circle-notch animate-spin"></i></span>
-                                Clear
-                            </button>
-                        </div>
-                    `;
-                });
-            }
-        }
-
-        // Toggle engine intercept mechanisms
-        function setSimMode(mode) {
-            currentEngineMode = mode;
-            const btnOptimistic = document.getElementById('mode-optimistic');
-            const btnLegacy = document.getElementById('mode-legacy');
-            const desc = document.getElementById('mode-desc');
-
-            if (!btnOptimistic || !btnLegacy || !desc) return;
-
-            if (mode === 'optimistic') {
-                btnOptimistic.className = "py-2 text-xs font-bold rounded-md transition-all bg-brand text-white shadow-md shadow-brand/20";
-                btnLegacy.className = "py-2 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
-                desc.innerHTML = `<strong>⚡ Optimistic Mode:</strong> Click any action and it takes place instantly. UI components update without waiting for database confirmation responses.`;
-                showToast("System Mode Adjusted", "Switched to High-Speed Optimistic Action Cache Engine.", "info");
-            } else {
-                btnLegacy.className = "py-2 text-xs font-bold rounded-md transition-all bg-brand text-white shadow-md shadow-brand/20";
-                btnOptimistic.className = "py-2 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
-                desc.innerHTML = `<strong>🐌 Standard Mode:</strong> Emulates native polling sync. Clicking any trigger halts interaction while waiting for server response callbacks to execute (simulating a 3-second network freeze).`;
-                showToast("System Mode Adjusted", "Switched to standard polling emulation. Expect interaction lag.", "warning");
-            }
-        }
-
-        // Output lines directly inside log viewer component
-        function logTerminal(message, type = "info") {
-            const term = document.getElementById('sim-terminal');
-            if (!term) return;
-            const time = new Date().toLocaleTimeString();
-            let prefix = `<span class="text-brand-light">[INFO ${time}]</span>`;
-            if (type === 'success') prefix = `<span class="text-brand-emerald">[SUCCESS ${time}]</span>`;
-            if (type === 'warning') prefix = `<span class="text-amber-400">[WARN ${time}]</span>`;
-            if (type === 'api') prefix = `<span class="text-brand-purple">[API ${time}]</span>`;
-
-            term.innerHTML += `<div>${prefix} ${message}</div>`;
-            term.scrollTop = term.scrollHeight;
-        }
-
-        // Custom notification system (Prevents using alert)
-        function showToast(title, body, type = "success") {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            toast.className = "toast-enter p-4 rounded-xl border glass-card shadow-xl flex items-start gap-3 pointer-events-auto select-none";
-            
-            let icon = '<i class="fa-solid fa-circle-check text-brand-emerald text-lg"></i>';
-            if (type === 'warning') {
-                toast.classList.add('border-amber-500/30');
-                icon = '<i class="fa-solid fa-circle-exclamation text-amber-500 text-lg"></i>';
-            } else if (type === 'info') {
-                toast.classList.add('border-brand/30');
-                icon = '<i class="fa-solid fa-info text-brand-light text-lg"></i>';
-            } else {
-                toast.classList.add('border-brand-emerald/30');
-            }
-
-            toast.innerHTML = `
-                ${icon}
-                <div>
-                    <h6 class="text-xs font-bold text-white leading-tight">${title}</h6>
-                    <p class="text-[10px] text-gray-400 mt-0.5 leading-normal">${body}</p>
-                </div>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = "slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) reverse forwards";
-                setTimeout(() => toast.remove(), 400);
-            }, 3500);
-        }
-
-        // Sparkle interaction feedback
-        function spawnSparkles(e) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            for (let i = 0; i < 6; i++) {
-                const sparkle = document.createElement('span');
-                sparkle.className = 'sparkle';
-                sparkle.style.left = `${x}px`;
-                sparkle.style.top = `${y}px`;
-                sparkle.style.width = `${Math.random() * 5 + 3}px`;
-                sparkle.style.height = sparkle.style.width;
-
-                const mx = (Math.random() - 0.5) * 80;
-                const my = (Math.random() - 0.5) * 80;
-                sparkle.style.setProperty('--mx', `${mx}px`);
-                sparkle.style.setProperty('--my', `${my}px`);
-
-                e.currentTarget.appendChild(sparkle);
-                setTimeout(() => sparkle.remove(), 600);
-            }
-        }
-
-        // Active inventory reduction transaction
-        function consumeProduct(itemId, event) {
-            const item = pantryItems.find(i => i.id === itemId);
-            if (!item) return;
-
-            spawnSparkles(event);
-            const button = event.currentTarget;
-            const spinner = button.querySelector('.spinner');
-
-            if (currentEngineMode === 'optimistic') {
-                // Instant Visual feedback implementation
-                logTerminal(`Optimistic UI intercepted click on [${item.name}]. UI state updated instantly.`, "success");
-                pantryItems = pantryItems.filter(i => i.id !== itemId);
-                updateDashboardUI();
-                showToast("Product Consumed", `Deducted 1 x ${item.name} from Home Database.`, "success");
-
-                // Execute REST dispatcher logic in the background
-                logTerminal(`Dispatched backend post handler: grocy.consume_product_from_stock { product_id: ${item.id} }`, "api");
-            } else {
-                // Standard Blocking simulation logic (Simulates old integration errors)
-                button.disabled = true;
-                if (spinner) spinner.classList.remove('hidden');
-                logTerminal(`Dispatched standard synchronous post. Halting UI update while waiting...`, "warning");
-                
-                setTimeout(() => {
-                    pantryItems = pantryItems.filter(i => i.id !== itemId);
-                    updateDashboardUI();
-                    if (spinner) spinner.classList.add('hidden');
-                    button.disabled = false;
-                    logTerminal(`Received DB Callback Response [200]. Updating local state layout.`, "success");
-                    showToast("Product Consumed (Synced)", `Deducted 1 x ${item.name} from database.`, "success");
-                }, 3000); // 3-second artificial network loop stall
-            }
-        }
-
-        // Complete household Chore item
-        function completeChore(choreId, event) {
-            const chore = choreItems.find(c => c.id === choreId);
-            if (!chore) return;
-
-            spawnSparkles(event);
-            const button = event.currentTarget;
-            const spinner = button.querySelector('.spinner');
-
-            if (currentEngineMode === 'optimistic') {
-                logTerminal(`Optimistic UI resolved chore completion [${chore.name}]. UI state updated instantly.`, "success");
-                choreItems = choreItems.filter(c => c.id !== choreId);
-                updateDashboardUI();
-                showToast("Chore Cleared", `Chore [${chore.name}] updated in home register.`, "success");
-                logTerminal(`Dispatched background post: grocy.execute_chore { chore_id: ${chore.baseId} }`, "api");
-            } else {
-                button.disabled = true;
-                if (spinner) spinner.classList.remove('hidden');
-                logTerminal(`Dispatched standard chore post. UI freeze engaged...`, "warning");
-
-                setTimeout(() => {
-                    choreItems = choreItems.filter(c => c.id !== choreId);
-                    updateDashboardUI();
-                    if (spinner) spinner.classList.add('hidden');
-                    button.disabled = false;
-                    logTerminal(`DB update committed successfully for chore register.`, "success");
-                    showToast("Chore Completed (Synced)", `Database logged execution state.`, "success");
-                }, 3000);
-            }
-        }
-
-        // Trigger simulator NFC actions
-        function triggerNFC(tagType, actionId) {
-            logTerminal(`[NFC Scan Registered] Scanned physical tag payload identifier for target action id: ${actionId}`, "api");
-            showToast("NFC Sticker Read", `Sending automated command trigger chain...`, "info");
-            
-            if (tagType === 'dog_food') {
-                logTerminal(`NFC Automation Event triggered: Executing services concurrently...`, "api");
-                
-                // Complete Dog Feeding Chore
-                const dogChore = choreItems.find(c => c.id === 'chore-dog');
-                if (dogChore) {
-                    choreItems = choreItems.filter(c => c.id !== 'chore-dog');
-                    logTerminal(`Completed Chore: "Feed the Dogs" via NFC handler integration.`, "success");
-                }
-                
-                // Consume associated stock item (Whole Milk simulating raw resource)
-                pantryItems = pantryItems.map(item => {
-                    if (item.name === 'Fresh Whole Milk') {
-                        return { ...item, count: Math.max(0, item.count - 1) };
-                    }
-                    return item;
-                });
-
-                updateDashboardUI();
-                showToast("Smart Pantry Run Successful", "Dog food consumed & task cleared!", "success");
-            }
-        }
-
-        // Mock AI receipt scanner
-        function runAIReceiptVision() {
-            logTerminal(`[AI Scanner Initialized] Spawning thread to process virtual invoice image...`, "api");
-            showToast("Parsing Receipt Image", "AI model extracting items, quantities, and matching database entities...", "info");
-
-            setTimeout(() => {
-                const newItems = [
-                    { id: 'item-apples', name: 'Gala Apples (AI Import)', details: 'Expires in 10 days', type: 'normal', count: 6, base: 6, metric: 'qty' },
-                    { id: 'item-butter', name: 'Salted Cream Butter (AI)', details: 'Expires in 20 days', type: 'normal', count: 2, base: 2, metric: 'qty' }
-                ];
-                pantryItems = [...pantryItems, ...newItems];
-                updateDashboardUI();
-                logTerminal(`Receipt Vision processing resolved. Model matches schema with 98% accuracy.`, "success");
-                logTerminal(`Added bulk entities: grocy.add_products_by_name { Gala Apples: 6, Butter: 2 }`, "api");
-                showToast("Import Complete", "AI restocked pantry with Apples & Butter successfully!", "success");
-            }, 2500);
-        }
-
-        // Reset database items back to default
-        function resetSimulationData() {
-            pantryItems = [
-                { id: 'item-milk', name: 'Fresh Whole Milk', details: 'Expires in 2 days', type: 'expiring', count: 1, base: 1, metric: 'L' },
-                { id: 'item-avocado', name: 'Avocado Bag', details: 'Expires today!', type: 'expired', count: 1, base: 1, metric: 'qty' },
-                { id: 'item-yogurt', name: 'Greek Yogurt Pack', details: 'Expires in 5 days', type: 'normal', count: 4, base: 4, metric: 'qty' },
-                { id: 'item-eggs', name: 'Organic Dozen Eggs', details: 'Expires in 12 days', type: 'normal', count: 1, base: 1, metric: 'qty' }
-            ];
-
-            choreItems = [
-                { id: 'chore-dog', name: 'Feed the Dogs', schedule: 'Morning schedule', completed: false, baseId: 12 },
-                { id: 'chore-trash', name: 'Take out Trash Bin', schedule: 'Weekly schedule', completed: false, baseId: 15 }
-            ];
-
-            updateDashboardUI();
-            logTerminal("Restored initial test data registers.", "info");
-            showToast("Simulation Reset", "Reloaded default test pantry and chore components.", "info");
-        }
-
-        // Interactive wiki tab navigation system
-        function switchWikiTab(tabId) {
-            const tabs = ['backend', 'ai', 'nfc', 'lovelace'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-btn-${t}`);
-                const panel = document.getElementById(`tab-panel-${t}`);
-                if (t === tabId) {
-                    btn.className = "px-5 py-4 text-xs font-extrabold text-white border-b-2 border-brand flex items-center gap-2 shrink-0 transition-all";
-                    panel.classList.remove('hidden');
-                } else {
-                    btn.className = "px-5 py-4 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white flex items-center gap-2 shrink-0 transition-all";
-                    panel.classList.add('hidden');
-                }
-            });
-        }
-
-        // Copy plain text path snippets to system clipboards
-        function copySnippet(id) {
-            let text = '';
-            if (id === 'hacs-repo') text = 'https://github.com/DonTranQuiL/Grocy';
-            if (id === 'card-path') text = '/config/www/grocy-action-card.js';
-            
-            const area = document.createElement('textarea');
-            area.value = text;
-            document.body.appendChild(area);
-            area.select();
-            document.execCommand('copy');
-            document.body.removeChild(area);
-            showToast("Copied to Clipboard", text, "success");
-        }
-
-        // Copy raw yaml templates to memory
-        function copyCodeBlock(id) {
-            const block = document.getElementById(id);
-            if (!block) return;
-            const area = document.createElement('textarea');
-            area.value = block.innerText;
-            document.body.appendChild(area);
-            area.select();
-            document.execCommand('copy');
-            document.body.removeChild(area);
-            showToast("Code Copied", "YAML structure placed in keyboard memory stream.", "success");
-        }
-    </script>
-
-    <script>
-        let scene, camera, renderer, particles;
-        let mouseX = 0, mouseY = 0;
-
-        // Initialize Three.js swirling background particles
-        function initThreeJS() {
-            const container = document.getElementById('webgl-background');
-            if (!container) return;
-            
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-
-            // Scene Setup
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, width / height, 1, 1000);
-            camera.position.z = 250;
-
-            // Particles Geometry setup
-            const geometry = new THREE.BufferGeometry();
-            const positions = [];
-            const colors = [];
-
-            const particleCount = 200;
-            for (let i = 0; i < particleCount; i++) {
-                positions.push((Math.random() - 0.5) * 600);
-                positions.push((Math.random() - 0.5) * 600);
-                positions.push((Math.random() - 0.5) * 600);
-
-                // Setup colors matching gradients (Cyan & Purple)
-                const isCyan = Math.random() > 0.5;
-                if (isCyan) {
-                    colors.push(0.22, 0.74, 0.97); // Cyan
-                } else {
-                    colors.push(0.54, 0.36, 0.96); // Purple
-                }
-            }
-
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-            // Particle Material Styling
-            const material = new THREE.PointsMaterial({
-                size: 3,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.45,
-                blending: THREE.AdditiveBlending
-            });
-
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-
-            // Renderer Setup
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-
-            // Listeners
-            window.addEventListener('resize', onWindowResize);
-            document.addEventListener('mousemove', onDocumentMouseMove);
-
-            animate();
-        }
-
-        // Re-calculate dimensions when the browser window scale changes
-        function onWindowResize() {
-            if (!camera || !renderer) return;
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function onDocumentMouseMove(event) {
-            mouseX = (event.clientX - window.innerWidth / 2) * 0.05;
-            mouseY = (event.clientY - window.innerHeight / 2) * 0.05;
-        }
-
-        // Main rendering animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (particles) {
-                particles.rotation.x += 0.0008;
-                particles.rotation.y += 0.0006;
-            }
-
-            if (camera && scene) {
-                camera.position.x += (mouseX - camera.position.x) * 0.05;
-                camera.position.y += (-mouseY - camera.position.y) * 0.05;
-                camera.lookAt(scene.position);
-            }
-
-            if (renderer && scene && camera) {
-                renderer.render(scene, camera);
-            }
-        }
-
-        // DOM Loaded event listener: Ensures element targets exist in DOM first!
-        window.addEventListener('DOMContentLoaded', () => {
-            // Update Dashboard Simulator elements
-            updateDashboardUI();
-            
-            // Start 3D background visual systems safely
-            initThreeJS();
-        });
-
-        // Navigation header scrolled opacity transition
-        window.addEventListener('scroll', () => {
-            const navbar = document.getElementById('navbar');
-            if (!navbar) return;
-            if (window.scrollY > 40) {
-                navbar.classList.add('bg-[#050811]/95', 'shadow-lg');
-            } else {
-                navbar.classList.remove('bg-[#050811]/95', 'shadow-lg');
-            }
-        });
+        document.addEventListener("DOMContentLoaded", () => { if (window.lucide) lucide.createIcons(); });
     </script>
 </body>
 </html>
