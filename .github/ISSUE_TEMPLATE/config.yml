@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://dontranquil.github.io/grocy-pro/
+    about: Setup, migration, actions and troubleshooting.
+  - name: 🥫 Grocy itself
+    url: https://github.com/grocy/grocy/issues
+    about: Problems with the Grocy server or web UI belong in the Grocy project.

@@ -45,11 +45,16 @@ jobs:
 
           mv "$tmp" "$MANIFEST"
 
+          CONST="custom_components/$INTEGRATION/const.py"
+          if [ -f "$CONST" ] && grep -q '^VERSION = ' "$CONST"; then
+            sed -i "s/^VERSION = \".*\"/VERSION = \"$VERSION\"/" "$CONST"
+          fi
+
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Bump manifest version to ${{ github.ref_name }} [skip ci]"
-          file_pattern: "custom_components/**/manifest.json"
+          file_pattern: "custom_components/**/manifest.json custom_components/**/const.py"
           branch: main
 
       - name: Create ZIP

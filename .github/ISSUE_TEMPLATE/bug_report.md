@@ -1,62 +1,45 @@
 ---
-name: Bug report
-about: Report a problem or unexpected behavior
-title: "[BUG] "
+name: 🐛 Bug report
+about: Report a problem or unexpected behavior in Grocy Pro
+title: "[BUG] <Brief description of the issue>"
 labels: bug
 assignees: ''
-
 ---
 
-## Checklist
+## 🛑 Checklist
+- [ ] I am using the latest version of Grocy Pro.
+- [ ] I have checked the existing open and closed issues.
+- [ ] I have enabled debug logging and included the logs below.
 
-Before submitting, please confirm:
+## 📝 Describe the bug
+A clear and concise description of what the bug is.
 
-- [ ] I am using the latest version of the integration
-- [ ] I have checked existing issues
-- [ ] I enabled debug logging (if applicable)
-- [ ] I included relevant logs
+## ⚙️ Environment
+- **Home Assistant version:** (e.g. 2026.10.1)
+- **Grocy Pro version:** (e.g. v3.0.0)
+- **Grocy version:** (Grocy → About, e.g. 4.7.1)
+- **How Grocy runs:** (HA add-on / Docker / other, behind a reverse proxy?)
+- **Installation method:** (HACS / manual)
+- **Migrated from the old `grocy` integration:** (Yes / No)
 
----
-
-## Describe the bug
-
-A clear and concise description of the issue.
-
----
-
-## To Reproduce
-
-Steps to reproduce the behavior:
-
+## 🔄 To reproduce
 1. Go to '...'
-2. Click on '...'
-3. Configure '...'
-4. See error
+2. Call action '...'
+3. See error
 
----
+## 🎯 Expected behavior
 
-## Expected behavior
+## 💥 Actual behavior
 
-Describe what you expected to happen.
+## 📋 Logs
+Settings → System → Logs. To enable debug logging, add this to `configuration.yaml`, restart and trigger the issue again:
 
----
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.grocy_pro: debug
+    grocy: debug
+```
 
-## Actual behavior
-
-Describe what actually happened.
-
----
-
-## Logs
-
-Please paste all relevant logs from:
-
-`Settings → System → Logs`
-
-You can also enable debug logging if needed.
-
-<details>
-<summary>Logs</summary>
-
-```text
-Paste logs here
+Or download the diagnostics: Settings → Devices & services → Grocy Pro → ⋮ → Download diagnostics (the API key and URL are redacted).

@@ -3,27 +3,54 @@ name: Discord release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to (re)announce, e.g. v1.0.1"
+        required: true
+
+permissions:
+  contents: read
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Load release for manual run
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          rel=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG")
+          {
+            echo "M_TAG=$(jq -r .tag_name <<<"$rel")"
+            echo "M_NAME=$(jq -r '.name // ""' <<<"$rel")"
+            echo "M_URL=$(jq -r .html_url <<<"$rel")"
+            echo "M_PUBLISHED=$(jq -r '.published_at // ""' <<<"$rel")"
+            echo "M_PRERELEASE=$(jq -r .prerelease <<<"$rel")"
+            echo "M_AUTHOR=$(jq -r '.author.login // ""' <<<"$rel")"
+            echo "M_BODY<<__BODY_EOF__"
+            jq -r '.body // ""' <<<"$rel"
+            echo "__BODY_EOF__"
+          } >> "$GITHUB_ENV"
+
       - name: Post the release embed
         env:
-          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_NAME: ${{ github.event.release.name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-          RELEASE_URL: ${{ github.event.release.html_url }}
+          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK || secrets.DISCORD_WEBHOOK }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || env.M_TAG }}
+          RELEASE_NAME: ${{ github.event.release.name || env.M_NAME }}
+          RELEASE_BODY: ${{ github.event.release.body || env.M_BODY }}
+          RELEASE_URL: ${{ github.event.release.html_url || env.M_URL }}
           REPO: ${{ github.event.repository.full_name }}
           REPO_NAME: ${{ github.event.repository.name }}
-          PUBLISHED: ${{ github.event.release.published_at }}
-          PRERELEASE: ${{ github.event.release.prerelease }}
-          AUTHOR_LOGIN: ${{ github.event.release.author.login }}
+          PUBLISHED: ${{ github.event.release.published_at || env.M_PUBLISHED }}
+          PRERELEASE: ${{ github.event.release.prerelease || env.M_PRERELEASE }}
+          AUTHOR_LOGIN: ${{ github.event.release.author.login || env.M_AUTHOR }}
         run: |
           if [ -z "$DISCORD_RELEASE_WEBHOOK" ]; then
-            echo "DISCORD_RELEASE_WEBHOOK is not set on this repository."
+            echo "No Discord webhook: set DISCORD_RELEASE_WEBHOOK (repo) or DISCORD_WEBHOOK (org) and give this repo access."
             exit 1
           fi
           python3 << 'PY'

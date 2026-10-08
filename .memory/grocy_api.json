@@ -1,0 +1,16 @@
+{
+  "checks": {
+    "batteries": [],
+    "calendar": [],
+    "chores": [],
+    "config": [],
+    "db_changed_time": [],
+    "meal_plan": [],
+    "shopping_list": [],
+    "stock": [],
+    "tasks": [],
+    "volatile": []
+  },
+  "grocy_py": "1.3.0",
+  "grocy_version": "4.7.1"
+}

@@ -31,7 +31,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install dependencies
         run: |
@@ -41,4 +41,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v tests/ --cov=custom_components/grocy/ --cov-report=xml
+          pytest -v tests/ --cov=custom_components/grocy_pro/ --cov-report=xml

@@ -1,9 +1,17 @@
-name: GROCY Feed Watcher
+name: AI Grocy API Watcher
+
+# Daily check that the Grocy API (public demo, latest Grocy release) still works
+# with the grocy-py version pinned in manifest.json. Opens an issue only when a
+# check newly fails.
 
 on:
   schedule:
-    - cron: "0 2 * * *" # Runs daily at 2:00 AM UTC
-  workflow_dispatch: # Allows you to run it manually from the Actions tab
+    - cron: "15 4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: feed-watcher
+  cancel-in-progress: false
 
 jobs:
   schema-audit:
@@ -11,7 +19,7 @@ jobs:
     permissions:
       issues: write
       contents: write
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -19,38 +27,39 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
-      - name: Install AI Engineer Dependencies
-        if: hashFiles('ai_engineer/feed_watcher.py') != ''
-        run: pip install requests openai
+      - name: Install Dependencies
+        run: |
+          pip install requests openai
+          # Same grocy-py / icalendar versions the integration installs
+          jq -r '.requirements[]' custom_components/grocy_pro/manifest.json | xargs pip install
 
-      - name: Run Feed Watcher Agent
-        if: hashFiles('ai_engineer/feed_watcher.py') != ''
+      - name: Run Grocy API Watcher
         id: watcher
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
         run: python ai_engineer/feed_watcher.py
 
-      - name: Skip when ai_engineer/feed_watcher.py absent
-        if: hashFiles('ai_engineer/feed_watcher.py') == ''
-        run: echo "ai_engineer/feed_watcher.py not present in this repo; skipping watcher"
-      - name: Create Issue on Breakage
+      - name: Create Issue
         if: env.SCHEMA_CHANGED == 'true'
         uses: peter-evans/create-issue-from-file@v6
         with:
-          title: "?? Upstream Breakage Detected: Earthquake Feed Schema Changed"
-          content-filepath: ./ai_report.md
-          labels: |
-            bug
-            ai-detected
-            upstream-change
+          title: ${{ env.ISSUE_TITLE }}
+          content-filepath: ./feed_watch_report.md
+          labels: bug, upstream-change, ai-detected
 
-      - name: Save AI Memory
-        if: hashFiles('ai_engineer/feed_watcher.py') != ''
+      - name: Save API Memory Snapshots
         run: |
-          git config --global user.name "AI Staff Engineer"
-          git config --global user.email "secret@github.com"
-          git add .memory/
-          git commit -m "?? Update earthquake schema baseline" || echo "Memory is already up to date"
+          mkdir -p .memory
+          if [ -z "$(git status --porcelain -- .memory)" ]; then
+            echo "Memory is already up to date"
+            exit 0
+          fi
+          git config user.name "AI Staff Engineer"
+          git config user.email "ai@github.com"
+          git add -- .memory/
+          git commit -m "chore: update Grocy API baseline [skip ci]" || { echo "Memory is already up to date"; exit 0; }
+          git pull --rebase --quiet || true
           git push

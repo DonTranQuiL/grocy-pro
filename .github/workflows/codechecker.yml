@@ -4,7 +4,6 @@ on:
   push:
   pull_request:
 
-# We need write permissions so the bot can commit the fixes back to your repo
 permissions:
   contents: write
 
@@ -15,8 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # Required so the bot can push changes back
-          fetch-depth: 0 
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v7
         with:
@@ -27,13 +27,12 @@ jobs:
 
       - name: Auto-fix and format Python code
         run: |
-          # The --fix flag tells Ruff to resolve safe errors (like unused imports)
           ruff check --fix .
-          # This formats the code to ensure spacing and line lengths are perfect
           ruff format .
 
       - name: Commit changes back to branch
+        if: github.event_name == 'push'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          # Automatically commits the fixes. [skip ci] prevents an infinite loop of checks.
           commit_message: "style: auto-fix ruff linting and formatting [skip ci]"
+          branch: ${{ github.head_ref || github.ref_name }}
