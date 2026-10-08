@@ -1,5 +1,2 @@
-pytest>=8.0.0
-pytest-homeassistant-custom-component>=0.13.0
-pytest-asyncio>=0.23.0
-pytest-cov>=5.0.0
-respx>=0.21.0
+# Runtime requirements are declared in custom_components/grocy_pro/manifest.json
+# (grocy-py and icalendar); Home Assistant installs them.

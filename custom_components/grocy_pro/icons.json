@@ -1,0 +1,17 @@
+{
+  "services": {
+    "add_product_to_stock": { "service": "mdi:cart-plus" },
+    "open_product": { "service": "mdi:package-variant" },
+    "consume_product_from_stock": { "service": "mdi:food-apple" },
+    "execute_chore": { "service": "mdi:broom" },
+    "complete_task": { "service": "mdi:checkbox-marked-circle-outline" },
+    "add_generic": { "service": "mdi:plus-box-outline" },
+    "update_generic": { "service": "mdi:pencil-box-outline" },
+    "delete_generic": { "service": "mdi:delete-outline" },
+    "consume_recipe": { "service": "mdi:chef-hat" },
+    "track_battery": { "service": "mdi:battery-charging" },
+    "add_missing_products_to_shopping_list": { "service": "mdi:cart-arrow-down" },
+    "remove_product_in_shopping_list": { "service": "mdi:cart-remove" },
+    "add_products_by_name": { "service": "mdi:receipt-text-plus" }
+  }
+}

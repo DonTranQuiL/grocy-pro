@@ -8,9 +8,7 @@ class GrocyActionCard extends HTMLElement {
 
     if (!this.terminalLogs) {
       this.terminalLogs = [
-        `[SUCCESS 12:08:46 PM] Receipt Vision processing resolved. Model matches schema with 98% accuracy.`,
-        `[API 12:08:46 PM] Added bulk entities: grocy.add_products_by_name { Gala Apples: 6, Butter: 2 }`,
-        `[INFO 12:09:51 PM] Restored initial test data registers.`
+        `<div class="log-info">[INFO ${new Date().toLocaleTimeString()}] Grocy Pro card ready.</div>`
       ];
     }
 
@@ -472,6 +470,19 @@ class GrocyActionCard extends HTMLElement {
     this.render();
   }
 
+  get domain() {
+    return (this.config && this.config.domain) || "grocy_pro";
+  }
+
+  entityId(platform, key) {
+    const prefix = (this.config && this.config.entity_prefix) || "grocy";
+    return `${platform}.${prefix}_${key}`;
+  }
+
+  esc(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
   getAttr(entityId, attrName) {
     const entity = this._hass.states[entityId];
     if (!entity || !entity.attributes) return [];
@@ -504,7 +515,7 @@ class GrocyActionCard extends HTMLElement {
       logClass = "log-warn";
     }
 
-    const logLine = `<div class="${logClass}">${prefix} ${message}</div>`;
+    const logLine = `<div class="${logClass}">${prefix} ${this.esc(message)}</div>`;
     this.terminalLogs.push(logLine);
     
     // Keep logs truncated to avoid scrolling infinite bloat
@@ -524,11 +535,11 @@ class GrocyActionCard extends HTMLElement {
   }
 
   render() {
-    const chores = this.getAttr('sensor.grocy_chores', 'chores');
-    const tasks = this.getAttr('sensor.grocy_tasks', 'tasks');
-    const stock = this.getAttr('sensor.grocy_stock', 'products');
-    const shoppingList = this.getAttr('sensor.grocy_shopping_list', 'products');
-    const overdueBatteries = this.getAttr('binary_sensor.grocy_overdue_batteries', 'overdue_batteries');
+    const chores = this.getAttr(this.entityId('sensor', 'chores'), 'chores');
+    const tasks = this.getAttr(this.entityId('sensor', 'tasks'), 'tasks');
+    const stock = this.getAttr(this.entityId('sensor', 'stock'), 'products');
+    const shoppingList = this.getAttr(this.entityId('sensor', 'shopping_list'), 'products');
+    const overdueBatteries = this.getAttr(this.entityId('binary_sensor', 'overdue_batteries'), 'overdue_batteries');
 
     const getProductName = (id) => {
       const item = stock.find(s => s.product_id == id || s.id == id);
@@ -542,12 +553,13 @@ class GrocyActionCard extends HTMLElement {
     const choreItems = [];
     const shoppingItems = [];
     
-    const locationNames = {
+    // Grocy location IDs -> names. Override with `locations:` in the card config.
+    const locationNames = Object.assign({
       1: "Pantry",
       2: "Fridge",
       3: "Freezer",
       4: "Cupboards"
-    };
+    }, (this.config && this.config.locations) || {});
     
     const foodByLocation = {};
 
@@ -590,8 +602,8 @@ class GrocyActionCard extends HTMLElement {
       foodSet.add(id);
 
       // Quantities & units parsing
-      const amt = food.amount || food.amount_aggregated || 1;
-      const unit = food.qu_unit_name_stock || food.unit || food.qu_unit_name || "";
+      const amt = food.available_amount ?? food.amount_aggregated ?? food.amount ?? 1;
+      const unit = food.default_quantity_unit_purchase?.name || food.qu_unit_name_stock || food.unit || "";
       let shortUnit = "";
       
       if (unit) {
@@ -619,7 +631,7 @@ class GrocyActionCard extends HTMLElement {
         date: food.best_before_date, 
         overdue: overdueFlag, 
         expiring: expiringFlag,
-        qtyLabel: `${Math.round(amt)}${shortUnit}`,
+        qtyLabel: `${Number(Number(amt).toFixed(1))}${shortUnit}`,
         type: "food" 
       };
       
@@ -638,10 +650,12 @@ class GrocyActionCard extends HTMLElement {
 
     shoppingList.forEach(s => {
       const pId = s.product_id;
+      if (!pId || s.done) return; // notes without a product can't be removed by product
       if (this.processedItems.has('shopping_' + pId)) return;
       shoppingItems.push({
         id: pId,
-        title: getProductName(pId),
+        title: s.product?.name || getProductName(pId),
+        amount: s.amount || 1,
         qtyLabel: `${s.amount}x`,
         date: s.note ? `Note: ${s.note}` : null,
         overdue: false,
@@ -665,12 +679,12 @@ class GrocyActionCard extends HTMLElement {
         <div class="section-wrapper">
           <div class="section-label">
             <ha-icon icon="${icon}"></ha-icon>
-            <span>${title}</span>
+            <span>${this.esc(title)}</span>
           </div>
       `;
 
       if (!items || !items.length) {
-        html += `<div class="empty-state">All safe and cleared ??</div>`;
+        html += `<div class="empty-state">All clear ✅</div>`;
       } else {
         items.forEach(item => {
           let buttons = "";
@@ -689,30 +703,30 @@ class GrocyActionCard extends HTMLElement {
 
           if (item.type === "task") {
             leftElement = `<div class="item-icon-box task-icon"><ha-icon icon="mdi:clipboard-check-outline"></ha-icon></div>`;
-            buttons = `<button class="grocy-btn action-btn" data-action="task" data-id="${item.id}" data-name="${item.title}">Done</button>`;
-            hardDeleteHtml = `<button class="hard-delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="tasks" data-name="${item.title}" title="Delete Task"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`;
+            buttons = `<button class="grocy-btn action-btn" data-action="task" data-id="${item.id}" data-name="${this.esc(item.title)}">Done</button>`;
+            hardDeleteHtml = `<button class="hard-delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="tasks" data-name="${this.esc(item.title)}" title="Delete Task"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`;
           } 
           else if (item.type === "chore") {
             leftElement = `<div class="item-icon-box chore-icon"><ha-icon icon="mdi:broom"></ha-icon></div>`;
-            buttons = `<button class="grocy-btn btn-clear action-btn" data-action="chore" data-id="${item.id}" data-name="${item.title}">Clear</button>`;
-            hardDeleteHtml = `<button class="hard-delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="chores" data-name="${item.title}" title="Delete Chore"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`;
+            buttons = `<button class="grocy-btn btn-clear action-btn" data-action="chore" data-id="${item.id}" data-name="${this.esc(item.title)}">Clear</button>`;
+            hardDeleteHtml = `<button class="hard-delete-btn action-btn" data-action="delete" data-id="${item.id}" data-type="chores" data-name="${this.esc(item.title)}" title="Delete Chore"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`;
           } 
           else if (item.type === "battery") {
             leftElement = `<div class="item-icon-box battery-icon"><ha-icon icon="mdi:battery-alert"></ha-icon></div>`;
-            buttons = `<button class="grocy-btn btn-waste action-btn" data-action="battery" data-id="${item.id}" data-name="${item.title}">Charge</button>`;
+            buttons = `<button class="grocy-btn btn-waste action-btn" data-action="battery" data-id="${item.id}" data-name="${this.esc(item.title)}">Charge</button>`;
           }
           else if (item.type === "shopping") {
             leftElement = `<div class="item-qty-box">${item.qtyLabel}</div>`;
-            buttons = `<button class="grocy-btn btn-waste action-btn" data-action="shopping" data-id="${item.id}" data-name="${item.title}">Remove</button>`;
+            buttons = `<button class="grocy-btn btn-waste action-btn" data-action="shopping" data-id="${item.id}" data-amount="${item.amount}" data-name="${this.esc(item.title)}">Remove</button>`;
           }
           else if (item.type === "food") {
             leftElement = `<div class="item-qty-box">${item.qtyLabel || '1'}</div>`;
             if (item.overdue) {
-              buttons = `<button class="grocy-btn btn-waste action-btn" data-action="consume" data-id="${item.id}" data-name="${item.title}" data-spoiled="true">Waste</button>`;
+              buttons = `<button class="grocy-btn btn-waste action-btn" data-action="consume" data-id="${item.id}" data-name="${this.esc(item.title)}" data-spoiled="true">Waste</button>`;
             } else {
               buttons = `
-                <button class="grocy-btn btn-open action-btn" data-action="open" data-id="${item.id}" data-name="${item.title}">Open</button>
-                <button class="grocy-btn action-btn" data-action="consume" data-id="${item.id}" data-name="${item.title}" data-spoiled="false">Consume</button>
+                <button class="grocy-btn btn-open action-btn" data-action="open" data-id="${item.id}" data-name="${this.esc(item.title)}">Open</button>
+                <button class="grocy-btn action-btn" data-action="consume" data-id="${item.id}" data-name="${this.esc(item.title)}" data-spoiled="false">Consume</button>
               `;
             }
           }
@@ -724,8 +738,8 @@ class GrocyActionCard extends HTMLElement {
               <div class="item-left-block">
                 ${leftElement}
                 <div class="item-details">
-                  <span class="item-title-text">${item.title}</span>
-                  <span class="item-meta-text ${metaStateClass}">${relativeDateStr}</span>
+                  <span class="item-title-text">${this.esc(item.title)}</span>
+                  <span class="item-meta-text ${metaStateClass}">${this.esc(relativeDateStr)}</span>
                 </div>
               </div>
               <div class="item-actions">
@@ -798,7 +812,7 @@ class GrocyActionCard extends HTMLElement {
         else if (action === 'open') this.openFood(id, name, btn);
         else if (action === 'delete') this.deleteItem(id, name, btn.dataset.type, btn);
         else if (action === 'battery') this.trackBattery(id, name, btn);
-        else if (action === 'shopping') this.removeShoppingItem(id, name, btn);
+        else if (action === 'shopping') this.removeShoppingItem(id, name, btn, parseFloat(btn.dataset.amount) || 1);
       });
     });
   }
@@ -812,7 +826,7 @@ class GrocyActionCard extends HTMLElement {
     this.addTerminalLog(`Executing chore task routine: "${name}"...`, "info");
     this.setLoadingState(btn, "Clearing");
     
-    this._hass.callService("grocy", "execute_chore", { chore_id: parseInt(id) })
+    this._hass.callService(this.domain, "execute_chore", { chore_id: parseInt(id) })
       .then(() => { 
         this.processedItems.add('chore_' + id); 
         this.addTerminalLog(`Successfully cleared chore: "${name}". Cache flushed.`, "success");
@@ -829,7 +843,7 @@ class GrocyActionCard extends HTMLElement {
     this.addTerminalLog(`Marking task resolved: "${name}"...`, "info");
     this.setLoadingState(btn, "Done");
     
-    this._hass.callService("grocy", "complete_task", { task_id: parseInt(id) })
+    this._hass.callService(this.domain, "complete_task", { task_id: parseInt(id) })
       .then(() => { 
         this.processedItems.add('task_' + id); 
         this.addTerminalLog(`Task record successfully marked done: "${name}".`, "success");
@@ -847,7 +861,7 @@ class GrocyActionCard extends HTMLElement {
     this.addTerminalLog(`Dispatched consume action for item: "${name}" (Spoiled: ${spoiled})...`, "info");
     this.setLoadingState(btn, actionName);
     
-    this._hass.callService("grocy", "consume_product_from_stock", { product_id: parseInt(id), amount: 1, spoiled: spoiled, transaction_type: "CONSUME" })
+    this._hass.callService(this.domain, "consume_product_from_stock", { product_id: parseInt(id), amount: 1, spoiled: spoiled, transaction_type: "consume" })
       .then(() => { 
         this.processedItems.add('food_' + id); 
         this.addTerminalLog(`Service response [200]: Deducted 1 x "${name}" from stock index.`, "success");
@@ -864,7 +878,7 @@ class GrocyActionCard extends HTMLElement {
     this.addTerminalLog(`Marking item status opened: "${name}"...`, "info");
     this.setLoadingState(btn, "Opening");
     
-    this._hass.callService("grocy", "open_product", { product_id: parseInt(id), amount: 1 })
+    this._hass.callService(this.domain, "open_product", { product_id: parseInt(id), amount: 1 })
       .then(() => { 
         btn.disabled = true;
         btn.innerText = "Opened"; 
@@ -881,7 +895,7 @@ class GrocyActionCard extends HTMLElement {
     this.addTerminalLog(`Registering charging cycle for battery element: "${name}"...`, "info");
     this.setLoadingState(btn, "Charging");
     
-    this._hass.callService("grocy", "track_battery", { battery_id: parseInt(id) })
+    this._hass.callService(this.domain, "track_battery", { battery_id: parseInt(id) })
       .then(() => { 
         this.processedItems.add('battery_' + id); 
         this.addTerminalLog(`Logged charge refresh sequence on battery object: "${name}".`, "success");
@@ -894,13 +908,13 @@ class GrocyActionCard extends HTMLElement {
       });
   }
 
-  removeShoppingItem(id, name, btn) {
+  removeShoppingItem(id, name, btn, amount = 1) {
     this.addTerminalLog(`Removing item from shopping list register: "${name}"...`, "info");
     this.setLoadingState(btn, "Removing");
     
-    this._hass.callService("grocy", "remove_product_in_shopping_list", { product_id: parseInt(id) })
+    this._hass.callService(this.domain, "remove_product_in_shopping_list", { product_id: parseInt(id), amount: amount })
       .then(() => { 
-        this.processedItems.add('shopping_' + pId); 
+        this.processedItems.add('shopping_' + id); 
         this.addTerminalLog(`Item "${name}" successfully deleted from current shopping cart list.`, "success");
         this.render(); 
       })
@@ -916,7 +930,7 @@ class GrocyActionCard extends HTMLElement {
     iconDiv.style.pointerEvents = "none"; 
     iconDiv.style.opacity = "0.2";
     
-    this._hass.callService("grocy", "delete_generic", { entity_type: entityType, object_id: parseInt(id) })
+    this._hass.callService(this.domain, "delete_generic", { entity_type: entityType, object_id: parseInt(id) })
       .then(() => {
         const prefix = entityType === 'tasks' ? 'task_' : entityType === 'chores' ? 'chore_' : 'food_';
         this.processedItems.add(prefix + id);
@@ -929,8 +943,21 @@ class GrocyActionCard extends HTMLElement {
       });
   }
 
-  setConfig(config) { this.config = config; }
+  setConfig(config) { this.config = config || {}; }
   getCardSize() { return 10; }
+  static getStubConfig() { return {}; }
 }
 
-customElements.define("grocy-action-card", GrocyActionCard);
+// Loaded automatically by the Grocy Pro integration. Guard against a second
+// copy (an old /local/grocy-action-card.js resource) defining it twice.
+if (!customElements.get("grocy-action-card")) {
+  customElements.define("grocy-action-card", GrocyActionCard);
+  window.customCards = window.customCards || [];
+  window.customCards.push({
+    type: "grocy-action-card",
+    name: "Grocy Pro Command Center",
+    description: "Stock, chores, tasks, batteries and the shopping list from Grocy Pro, with one-tap actions.",
+    preview: false,
+    documentationURL: "https://github.com/DonTranQuiL/grocy-pro#dashboard-card",
+  });
+}

@@ -1,0 +1,228 @@
+add_product_to_stock:
+  fields:
+    product_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+    amount:
+      required: true
+      default: 1
+      example: 1
+      selector:
+        number:
+          min: 0.01
+          max: 100000
+          step: any
+          mode: box
+    price:
+      example: 1.99
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+open_product:
+  fields:
+    product_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+    amount:
+      required: false
+      default: 1
+      example: 1
+      selector:
+        number:
+          min: 0.01
+          max: 100000
+          step: any
+          mode: box
+    allow_subproduct_substitution: &id001
+      default: false
+      selector:
+        boolean: {}
+consume_product_from_stock:
+  fields:
+    product_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+    amount:
+      required: false
+      default: 1
+      example: 1
+      selector:
+        number:
+          min: 0.01
+          max: 100000
+          step: any
+          mode: box
+    spoiled: *id001
+    allow_subproduct_substitution: *id001
+    transaction_type:
+      default: consume
+      selector:
+        select:
+          options:
+          - consume
+          - purchase
+          - inventory-correction
+          - product-opened
+          translation_key: transaction_type
+execute_chore:
+  fields:
+    chore_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+    done_by:
+      example: 1
+      selector:
+        number:
+          min: 0
+          mode: box
+    track_execution_now: *id001
+    skipped: *id001
+complete_task:
+  fields:
+    task_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+add_generic:
+  fields:
+    entity_type: &id002
+      required: true
+      example: tasks
+      selector:
+        select:
+          options:
+          - batteries
+          - battery_charge_cycles
+          - chores
+          - chores_log
+          - equipment
+          - locations
+          - meal_plan
+          - meal_plan_sections
+          - permission_hierarchy
+          - product_barcodes
+          - product_barcodes_view
+          - product_groups
+          - products
+          - products_average_price
+          - products_last_purchased
+          - quantity_unit_conversions
+          - quantity_unit_conversions_resolved
+          - quantity_units
+          - recipes
+          - recipes_nestings
+          - recipes_pos
+          - recipes_pos_resolved
+          - shopping_list
+          - shopping_lists
+          - shopping_locations
+          - stock
+          - stock_current_locations
+          - stock_log
+          - task_categories
+          - tasks
+          - userentities
+          - userfields
+          - userobjects
+          mode: dropdown
+    data: &id003
+      required: true
+      example: '{"name": "Task name", "due_date": "2026-12-24"}'
+      selector:
+        object: {}
+update_generic:
+  fields:
+    entity_type: *id002
+    object_id:
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+    data: *id003
+delete_generic:
+  fields:
+    entity_type: *id002
+    object_id:
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+consume_recipe:
+  fields:
+    recipe_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+track_battery:
+  fields:
+    battery_id:
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+add_missing_products_to_shopping_list:
+  fields:
+    list_id: &id004
+      default: 1
+      example: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+remove_product_in_shopping_list:
+  fields:
+    product_id:
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 1
+          mode: box
+    list_id: *id004
+    amount:
+      required: false
+      default: 1
+      example: 1
+      selector:
+        number:
+          min: 0.01
+          max: 100000
+          step: any
+          mode: box
+add_products_by_name:
+  fields:
+    items:
+      required: true
+      example: '[{"name": "Milk", "amount": 2, "price": 1.29}]'
+      selector:
+        object: {}

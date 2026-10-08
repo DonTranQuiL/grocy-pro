@@ -1,77 +1,158 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+"""Setup, entities, unload and diagnostics."""
 
-import pytest
+from __future__ import annotations
+
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 
-from custom_components.grocy import async_setup_entry, async_unload_entry
-from custom_components.grocy.const import DOMAIN, PLATFORMS
+from custom_components.grocy_pro.const import CARD_URL, DOMAIN
+from custom_components.grocy_pro.diagnostics import (
+    async_get_config_entry_diagnostics,
+)
+from custom_components.grocy_pro.services import SCHEMAS
+
+EXPECTED_STATES = {
+    "sensor.grocy_stock": "22",
+    "sensor.grocy_chores": "6",
+    "sensor.grocy_tasks": "5",
+    "sensor.grocy_shopping_list": "2",
+    "sensor.grocy_batteries": "4",
+    "sensor.grocy_meal_plan": "5",
+    "binary_sensor.grocy_expiring_products": "on",
+    "binary_sensor.grocy_overdue_products": "on",
+    "binary_sensor.grocy_expired_products": "off",
+    "binary_sensor.grocy_missing_products": "on",
+    "binary_sensor.grocy_overdue_tasks": "on",
+    "binary_sensor.grocy_overdue_chores": "off",
+    "binary_sensor.grocy_overdue_batteries": "on",
+    "todo.grocy_shopping_list": "1",  # one item is already done
+}
 
 
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations(enable_custom_integrations):
-    """Enable loading custom components during testing."""
-    yield
+async def test_setup_creates_entities(hass: HomeAssistant, setup_integration) -> None:
+    """All entities are created with the old sensor.grocy_* entity IDs."""
+    entry = await setup_integration()
+    assert entry.state is ConfigEntryState.LOADED
 
+    for entity_id, state in EXPECTED_STATES.items():
+        assert hass.states.get(entity_id) is not None, entity_id
+        assert hass.states.get(entity_id).state == state, entity_id
 
-@pytest.mark.asyncio
-async def test_setup_and_unload_entry(hass: HomeAssistant):
-    """Test full integration loading and clean tear downs."""
-    entry = MockConfigEntry(
-        domain=DOMAIN, data={"url": "test", "api_key": "key", "port": 9192}
+    assert hass.states.get("calendar.grocy_calendar") is not None
+
+    stock = hass.states.get("sensor.grocy_stock")
+    assert stock.attributes["count"] == 22
+    first = stock.attributes["products"][0]
+    assert {"id", "name", "available_amount", "picture_url"} <= set(first)
+    pictures = [p["picture_url"] for p in stock.attributes["products"]]
+    assert any(
+        url and url.startswith("/api/grocy_pro/productpictures/") for url in pictures
     )
-    entry.add_to_hass(hass)
 
-    with (
-        patch("custom_components.grocy.GrocyDataUpdateCoordinator") as mock_coord_cls,
-        patch(
-            "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups",
-            return_value=True,
-        ) as mock_forward,
-        patch("custom_components.grocy.async_setup_services", return_value=True),
-        patch(
-            "custom_components.grocy.async_setup_endpoint_for_image_proxy",
-            return_value=True,
-        ),
-    ):
-        mock_coord = MagicMock()
-        mock_coord.async_setup = AsyncMock()
-        mock_coord.async_config_entry_first_refresh = AsyncMock()
-        mock_coord_cls.return_value = mock_coord
+    chores = hass.states.get("sensor.grocy_chores").attributes["chores"]
+    assert all(chore["name"] for chore in chores)
 
-        assert await async_setup_entry(hass, entry) is True
-        mock_forward.assert_called_once_with(entry, PLATFORMS)
-        assert DOMAIN in hass.data
-
-        # Ensure the domain data is set properly for the unload phase
-        hass.data.setdefault(DOMAIN, {})[entry.entry_id] = mock_coord
-
-    with (
-        patch(
-            "homeassistant.config_entries.ConfigEntries.async_unload_platforms",
-            return_value=True,
-        ) as mock_unload,
-        patch("custom_components.grocy.async_unload_services", return_value=True),
-    ):
-        assert await async_unload_entry(hass, entry) is True
-        # Ruff is happy now because we actively verify the expected call arguments here:
-        mock_unload.assert_called_once_with(entry, PLATFORMS)
-        assert entry.entry_id not in hass.data.get(DOMAIN, {})
-
-
-@pytest.mark.asyncio
-async def test_setup_entry_failure(hass: HomeAssistant):
-    """Test unhandled exceptions throw ConfigEntryNotReady safely."""
-    entry = MockConfigEntry(
-        domain=DOMAIN, data={"url": "test", "api_key": "key", "port": 9192}
+    meals = hass.states.get("sensor.grocy_meal_plan").attributes["meals"]
+    assert meals and any(
+        (m["picture_url"] or "").startswith("/api/grocy_pro/recipepictures/")
+        for m in meals
     )
-    entry.add_to_hass(hass)
 
-    with patch("custom_components.grocy.GrocyDataUpdateCoordinator") as mock_coord_cls:
-        mock_coord = MagicMock()
-        mock_coord.async_setup = AsyncMock(side_effect=Exception("API Down"))
-        mock_coord_cls.return_value = mock_coord
+    overdue = hass.states.get("binary_sensor.grocy_overdue_batteries")
+    assert [b["name"] for b in overdue.attributes["overdue_batteries"]] == ["Battery3"]
 
-        with pytest.raises(ConfigEntryNotReady):
-            await async_setup_entry(hass, entry)
+    ent_reg = er.async_get(hass)
+    reg = ent_reg.async_get("sensor.grocy_stock")
+    assert reg.unique_id == f"{entry.entry_id}_stock"
+    assert reg.platform == DOMAIN
+
+    device = dr.async_get(hass).async_get(reg.device_id)
+    assert (DOMAIN, entry.entry_id) in device.identifiers
+    assert device.name == "Grocy"
+    assert device.configuration_url == "http://grocy.local:9192"
+
+
+async def test_services_and_card_registered(
+    hass: HomeAssistant, setup_integration
+) -> None:
+    """Services are registered once and the card is served."""
+    await setup_integration()
+    assert set(hass.services.async_services()[DOMAIN]) == set(SCHEMAS)
+    assert "grocy" not in hass.services.async_services()
+    resources = [r.canonical for r in hass.http.app.router.resources()]
+    assert CARD_URL in resources
+
+
+async def test_unload_and_reload(hass: HomeAssistant, setup_integration) -> None:
+    """The entry unloads and reloads cleanly (no duplicate registrations)."""
+    entry = await setup_integration()
+    assert await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.NOT_LOADED
+
+
+async def test_setup_retry_when_unreachable(
+    hass: HomeAssistant, mock_entry, grocy_server
+) -> None:
+    """A connection error makes Home Assistant retry later."""
+    import requests
+
+    grocy_server.fail = requests.ConnectionError("refused")
+    mock_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(mock_entry.entry_id)
+    await hass.async_block_till_done()
+    assert mock_entry.state is ConfigEntryState.SETUP_RETRY
+
+
+async def test_setup_auth_failure_starts_reauth(
+    hass: HomeAssistant, mock_entry, grocy_server
+) -> None:
+    """A rejected API key starts a reauth flow."""
+    grocy_server.fail = 401
+    mock_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(mock_entry.entry_id)
+    await hass.async_block_till_done()
+    assert mock_entry.state is ConfigEntryState.SETUP_ERROR
+    flows = hass.config_entries.flow.async_progress()
+    assert [f["context"]["source"] for f in flows] == ["reauth"]
+
+
+async def test_features_limit_entities(
+    hass: HomeAssistant, setup_integration, grocy_server
+) -> None:
+    """Disabled Grocy features don't create entities."""
+    config = grocy_server.routes["system/config"]
+    config["FEATURE_FLAG_BATTERIES"] = False
+    config["FEATURE_FLAG_CALENDAR"] = False
+    config["FEATURE_FLAG_SHOPPINGLIST"] = False
+    await setup_integration()
+    assert hass.states.get("sensor.grocy_batteries") is None
+    assert hass.states.get("calendar.grocy_calendar") is None
+    assert hass.states.get("todo.grocy_shopping_list") is None
+    assert hass.states.get("sensor.grocy_stock") is not None
+    assert not any(path.startswith("batteries") for _, path, _ in grocy_server.calls)
+
+
+async def test_diagnostics_redacts(hass: HomeAssistant, setup_integration) -> None:
+    """Diagnostics never contain the API key or URL."""
+    entry = await setup_integration()
+    diag = await async_get_config_entry_diagnostics(hass, entry)
+    assert diag["entry"]["api_key"] == "**REDACTED**"
+    assert diag["entry"]["url"] == "**REDACTED**"
+    assert diag["counts"]["stock"] == 22
+    assert diag["stats"]["full_refreshes"] == 1
+    assert "secret-key" not in str(diag)
+
+
+async def test_requests_get_a_timeout(
+    hass: HomeAssistant, setup_integration, grocy_server
+) -> None:
+    """grocy-py calls are made with a timeout."""
+    await setup_integration()
+    assert grocy_server.timeouts
+    assert all(t == 20 for t in grocy_server.timeouts)

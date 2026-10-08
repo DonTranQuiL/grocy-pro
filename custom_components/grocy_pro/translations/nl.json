@@ -1,0 +1,290 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Grocy Pro",
+        "description": "Er is een oude Grocy-integratie gevonden. Zet die over, of vul de verbinding handmatig in.",
+        "menu_options": {
+          "import_legacy": "Mijn oude Grocy-instelling overzetten",
+          "manual": "Handmatig instellen"
+        }
+      },
+      "manual": {
+        "title": "Verbinden met Grocy",
+        "data": {
+          "url": "URL",
+          "api_key": "API-sleutel",
+          "port": "Poort",
+          "verify_ssl": "SSL-certificaat controleren"
+        },
+        "data_description": {
+          "url": "Adres van je Grocy-server, bijv. 192.168.1.10 of grocy.example.com (met http of https ervoor). Een poort of subpad in de URL mag.",
+          "api_key": "Maak er een aan in Grocy onder Instellingen → API-sleutels beheren.",
+          "port": "Wordt genegeerd als de URL al een poort bevat. De Grocy-add-on gebruikt 9192; achter een reverse proxy 443 (of 80).",
+          "verify_ssl": "Zet aan als Grocy een geldig HTTPS-certificaat gebruikt."
+        }
+      },
+      "import_legacy": {
+        "title": "Oude Grocy-instelling overzetten",
+        "description": "Grocy Pro verbindt met {url} met de oude API-sleutel en verwijdert daarna de oude Grocy-instelling. Je entiteiten houden hun ID's (sensor.grocy_stock enzovoort) en hun geschiedenis. Automatiseringen die grocy.*-acties aanroepen moet je aanpassen naar grocy_pro.*."
+      },
+      "reauth_confirm": {
+        "title": "Nieuwe API-sleutel",
+        "description": "Grocy op {url} weigerde de API-sleutel. Vul een geldige in.",
+        "data": {
+          "api_key": "API-sleutel"
+        }
+      },
+      "reconfigure": {
+        "title": "Grocy-verbinding wijzigen",
+        "data": {
+          "url": "URL",
+          "api_key": "API-sleutel",
+          "port": "Poort",
+          "verify_ssl": "SSL-certificaat controleren"
+        },
+        "data_description": {
+          "url": "Adres van je Grocy-server, bijv. 192.168.1.10 of grocy.example.com (met http of https ervoor). Een poort of subpad in de URL mag.",
+          "api_key": "Maak er een aan in Grocy onder Instellingen → API-sleutels beheren.",
+          "port": "Wordt genegeerd als de URL al een poort bevat. De Grocy-add-on gebruikt 9192; achter een reverse proxy 443 (of 80).",
+          "verify_ssl": "Zet aan als Grocy een geldig HTTPS-certificaat gebruikt."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Grocy is niet bereikbaar. Controleer de URL en poort.",
+      "invalid_auth": "Grocy weigerde de API-sleutel.",
+      "invalid_url": "Dat adres antwoordt, maar niet als een Grocy-server. Controleer de URL, poort en het subpad."
+    },
+    "abort": {
+      "single_instance_allowed": "Grocy Pro is al ingesteld.",
+      "reauth_successful": "De API-sleutel is bijgewerkt.",
+      "reconfigure_successful": "De verbinding is bijgewerkt.",
+      "no_legacy_entry": "Geen oude Grocy-instelling gevonden."
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Grocy Pro is niet ingesteld of niet geladen."
+    },
+    "grocy_error": {
+      "message": "Grocy gaf een fout: {error}"
+    },
+    "product_not_found": {
+      "message": "Er is geen Grocy-product met de naam \"{name}\". Gebruik de exacte productnaam uit Grocy."
+    },
+    "products_not_found": {
+      "message": "Deze producten staan niet in Grocy en zijn overgeslagen: {names}"
+    }
+  },
+  "selector": {
+    "transaction_type": {
+      "options": {
+        "consume": "Verbruik",
+        "purchase": "Aankoop",
+        "inventory-correction": "Voorraadcorrectie",
+        "product-opened": "Product geopend"
+      }
+    }
+  },
+  "services": {
+    "add_product_to_stock": {
+      "name": "Product aan voorraad toevoegen",
+      "description": "Aankoop: voegt een hoeveelheid van een product toe aan de voorraad.",
+      "fields": {
+        "product_id": {
+          "name": "Product-ID",
+          "description": "Het Grocy-ID van het product."
+        },
+        "amount": {
+          "name": "Hoeveelheid",
+          "description": "Hoeveel, in de voorraadeenheid van het product."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Prijs per aankoopeenheid (optioneel)."
+        }
+      }
+    },
+    "open_product": {
+      "name": "Product openen",
+      "description": "Markeert een hoeveelheid van een product als geopend.",
+      "fields": {
+        "product_id": {
+          "name": "Product-ID",
+          "description": "Het Grocy-ID van het product."
+        },
+        "amount": {
+          "name": "Hoeveelheid",
+          "description": "Hoeveel, in de voorraadeenheid van het product."
+        },
+        "allow_subproduct_substitution": {
+          "name": "Subproducten toestaan",
+          "description": "Gebruik voorraad van subproducten als het product zelf op is."
+        }
+      }
+    },
+    "consume_product_from_stock": {
+      "name": "Product verbruiken",
+      "description": "Verbruikt (of verspilt) een hoeveelheid van een product uit de voorraad.",
+      "fields": {
+        "product_id": {
+          "name": "Product-ID",
+          "description": "Het Grocy-ID van het product."
+        },
+        "amount": {
+          "name": "Hoeveelheid",
+          "description": "Hoeveel, in de voorraadeenheid van het product."
+        },
+        "spoiled": {
+          "name": "Bedorven",
+          "description": "Boek de hoeveelheid als bedorven (weggegooid)."
+        },
+        "allow_subproduct_substitution": {
+          "name": "Subproducten toestaan",
+          "description": "Gebruik voorraad van subproducten als het product zelf op is."
+        },
+        "transaction_type": {
+          "name": "Transactietype",
+          "description": "Het soort voorraadboeking."
+        }
+      }
+    },
+    "execute_chore": {
+      "name": "Klus uitvoeren",
+      "description": "Registreert een klus als gedaan.",
+      "fields": {
+        "chore_id": {
+          "name": "Klus-ID",
+          "description": "Het Grocy-ID van de klus."
+        },
+        "done_by": {
+          "name": "Gedaan door",
+          "description": "Grocy-gebruikers-ID van wie het deed (optioneel)."
+        },
+        "track_execution_now": {
+          "name": "Nu registreren",
+          "description": "Registreer de uitvoering op het huidige tijdstip in plaats van het geplande."
+        },
+        "skipped": {
+          "name": "Overgeslagen",
+          "description": "Markeer deze keer als overgeslagen."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Taak voltooien",
+      "description": "Markeert een taak als gedaan.",
+      "fields": {
+        "task_id": {
+          "name": "Taak-ID",
+          "description": "Het Grocy-ID van de taak."
+        }
+      }
+    },
+    "add_generic": {
+      "name": "Object toevoegen",
+      "description": "Maakt een Grocy-object van elk type aan.",
+      "fields": {
+        "entity_type": {
+          "name": "Objecttype",
+          "description": "Het Grocy-objecttype."
+        },
+        "data": {
+          "name": "Gegevens",
+          "description": "Velden van het object, zoals in de Grocy-API (YAML of JSON)."
+        }
+      }
+    },
+    "update_generic": {
+      "name": "Object bijwerken",
+      "description": "Bewerkt een Grocy-object van elk type.",
+      "fields": {
+        "entity_type": {
+          "name": "Objecttype",
+          "description": "Het Grocy-objecttype."
+        },
+        "object_id": {
+          "name": "Object-ID",
+          "description": "Het Grocy-ID van het object."
+        },
+        "data": {
+          "name": "Gegevens",
+          "description": "Velden van het object, zoals in de Grocy-API (YAML of JSON)."
+        }
+      }
+    },
+    "delete_generic": {
+      "name": "Object verwijderen",
+      "description": "Verwijdert een Grocy-object van elk type.",
+      "fields": {
+        "entity_type": {
+          "name": "Objecttype",
+          "description": "Het Grocy-objecttype."
+        },
+        "object_id": {
+          "name": "Object-ID",
+          "description": "Het Grocy-ID van het object."
+        }
+      }
+    },
+    "consume_recipe": {
+      "name": "Recept verbruiken",
+      "description": "Verbruikt alle ingrediënten van een recept.",
+      "fields": {
+        "recipe_id": {
+          "name": "Recept-ID",
+          "description": "Het Grocy-ID van het recept."
+        }
+      }
+    },
+    "track_battery": {
+      "name": "Batterijlading registreren",
+      "description": "Registreert een laadcyclus voor een batterij.",
+      "fields": {
+        "battery_id": {
+          "name": "Batterij-ID",
+          "description": "Het Grocy-ID van de batterij."
+        }
+      }
+    },
+    "add_missing_products_to_shopping_list": {
+      "name": "Ontbrekende producten op boodschappenlijst",
+      "description": "Zet elk product onder de minimumvoorraad op een boodschappenlijst.",
+      "fields": {
+        "list_id": {
+          "name": "Boodschappenlijst-ID",
+          "description": "Welke boodschappenlijst (1 is de standaardlijst)."
+        }
+      }
+    },
+    "remove_product_in_shopping_list": {
+      "name": "Product van boodschappenlijst halen",
+      "description": "Haalt een hoeveelheid van een product van een boodschappenlijst.",
+      "fields": {
+        "product_id": {
+          "name": "Product-ID",
+          "description": "Het Grocy-ID van het product."
+        },
+        "list_id": {
+          "name": "Boodschappenlijst-ID",
+          "description": "Welke boodschappenlijst (1 is de standaardlijst)."
+        },
+        "amount": {
+          "name": "Hoeveelheid",
+          "description": "Hoeveel, in de voorraadeenheid van het product."
+        }
+      }
+    },
+    "add_products_by_name": {
+      "name": "Producten op naam toevoegen",
+      "description": "Voegt meerdere producten op hun Grocy-naam toe aan de voorraad, bijvoorbeeld van een door AI gelezen bon.",
+      "fields": {
+        "items": {
+          "name": "Items",
+          "description": "Lijst met producten met naam, hoeveelheid en optionele prijs."
+        }
+      }
+    }
+  }
+}

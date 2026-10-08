@@ -1,0 +1,290 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Grocy Pro",
+        "description": "An old Grocy integration setup was found. Move it over, or enter the connection manually.",
+        "menu_options": {
+          "import_legacy": "Move my old Grocy setup",
+          "manual": "Set up manually"
+        }
+      },
+      "manual": {
+        "title": "Connect to Grocy",
+        "data": {
+          "url": "URL",
+          "api_key": "API key",
+          "port": "Port",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "url": "Address of your Grocy server, e.g. 192.168.1.10 or grocy.example.com (include http or https at the start). A port or sub path in the URL is fine.",
+          "api_key": "Create one in Grocy under Settings → Manage API keys.",
+          "port": "Ignored when the URL already contains a port. The Grocy add-on uses 9192; behind a reverse proxy use 443 (or 80).",
+          "verify_ssl": "Turn on when Grocy uses a valid HTTPS certificate."
+        }
+      },
+      "import_legacy": {
+        "title": "Move the old Grocy setup",
+        "description": "Grocy Pro will connect to {url} with the old API key, then delete the old Grocy entry. Your entities keep their IDs (sensor.grocy_stock and so on) and their history. Automations that call grocy.* actions must be changed to grocy_pro.*."
+      },
+      "reauth_confirm": {
+        "title": "New API key",
+        "description": "Grocy at {url} rejected the API key. Enter a valid one.",
+        "data": {
+          "api_key": "API key"
+        }
+      },
+      "reconfigure": {
+        "title": "Change the Grocy connection",
+        "data": {
+          "url": "URL",
+          "api_key": "API key",
+          "port": "Port",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "url": "Address of your Grocy server, e.g. 192.168.1.10 or grocy.example.com (include http or https at the start). A port or sub path in the URL is fine.",
+          "api_key": "Create one in Grocy under Settings → Manage API keys.",
+          "port": "Ignored when the URL already contains a port. The Grocy add-on uses 9192; behind a reverse proxy use 443 (or 80).",
+          "verify_ssl": "Turn on when Grocy uses a valid HTTPS certificate."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach Grocy. Check the URL and port.",
+      "invalid_auth": "Grocy rejected the API key.",
+      "invalid_url": "That address answered, but not like a Grocy server. Check the URL, port and sub path."
+    },
+    "abort": {
+      "single_instance_allowed": "Grocy Pro is already set up.",
+      "reauth_successful": "The API key was updated.",
+      "reconfigure_successful": "The connection was updated.",
+      "no_legacy_entry": "No old Grocy setup was found."
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Grocy Pro is not set up or not loaded."
+    },
+    "grocy_error": {
+      "message": "Grocy returned an error: {error}"
+    },
+    "product_not_found": {
+      "message": "No Grocy product is called \"{name}\". Use the exact product name from Grocy."
+    },
+    "products_not_found": {
+      "message": "These products were not found in Grocy and were skipped: {names}"
+    }
+  },
+  "selector": {
+    "transaction_type": {
+      "options": {
+        "consume": "Consume",
+        "purchase": "Purchase",
+        "inventory-correction": "Inventory correction",
+        "product-opened": "Product opened"
+      }
+    }
+  },
+  "services": {
+    "add_product_to_stock": {
+      "name": "Add product to stock",
+      "description": "Purchase: adds an amount of a product to the stock.",
+      "fields": {
+        "product_id": {
+          "name": "Product ID",
+          "description": "The Grocy ID of the product."
+        },
+        "amount": {
+          "name": "Amount",
+          "description": "How much, in the product's stock unit."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Price per purchase unit (optional)."
+        }
+      }
+    },
+    "open_product": {
+      "name": "Open product",
+      "description": "Marks an amount of a product as opened.",
+      "fields": {
+        "product_id": {
+          "name": "Product ID",
+          "description": "The Grocy ID of the product."
+        },
+        "amount": {
+          "name": "Amount",
+          "description": "How much, in the product's stock unit."
+        },
+        "allow_subproduct_substitution": {
+          "name": "Allow sub-products",
+          "description": "Use stock of sub-products when the product itself is out."
+        }
+      }
+    },
+    "consume_product_from_stock": {
+      "name": "Consume product",
+      "description": "Consumes (or wastes) an amount of a product from the stock.",
+      "fields": {
+        "product_id": {
+          "name": "Product ID",
+          "description": "The Grocy ID of the product."
+        },
+        "amount": {
+          "name": "Amount",
+          "description": "How much, in the product's stock unit."
+        },
+        "spoiled": {
+          "name": "Spoiled",
+          "description": "Book the amount as spoiled (thrown away)."
+        },
+        "allow_subproduct_substitution": {
+          "name": "Allow sub-products",
+          "description": "Use stock of sub-products when the product itself is out."
+        },
+        "transaction_type": {
+          "name": "Transaction type",
+          "description": "The kind of stock booking."
+        }
+      }
+    },
+    "execute_chore": {
+      "name": "Execute chore",
+      "description": "Tracks a chore as done.",
+      "fields": {
+        "chore_id": {
+          "name": "Chore ID",
+          "description": "The Grocy ID of the chore."
+        },
+        "done_by": {
+          "name": "Done by",
+          "description": "Grocy user ID of who did it (optional)."
+        },
+        "track_execution_now": {
+          "name": "Track now",
+          "description": "Track the execution at the current time instead of the scheduled time."
+        },
+        "skipped": {
+          "name": "Skipped",
+          "description": "Mark this occurrence as skipped."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Complete task",
+      "description": "Marks a task as done.",
+      "fields": {
+        "task_id": {
+          "name": "Task ID",
+          "description": "The Grocy ID of the task."
+        }
+      }
+    },
+    "add_generic": {
+      "name": "Add object",
+      "description": "Creates a Grocy object of any type.",
+      "fields": {
+        "entity_type": {
+          "name": "Object type",
+          "description": "The Grocy object type."
+        },
+        "data": {
+          "name": "Data",
+          "description": "Fields of the object, as in the Grocy API (YAML or JSON)."
+        }
+      }
+    },
+    "update_generic": {
+      "name": "Update object",
+      "description": "Edits a Grocy object of any type.",
+      "fields": {
+        "entity_type": {
+          "name": "Object type",
+          "description": "The Grocy object type."
+        },
+        "object_id": {
+          "name": "Object ID",
+          "description": "The Grocy ID of the object."
+        },
+        "data": {
+          "name": "Data",
+          "description": "Fields of the object, as in the Grocy API (YAML or JSON)."
+        }
+      }
+    },
+    "delete_generic": {
+      "name": "Delete object",
+      "description": "Deletes a Grocy object of any type.",
+      "fields": {
+        "entity_type": {
+          "name": "Object type",
+          "description": "The Grocy object type."
+        },
+        "object_id": {
+          "name": "Object ID",
+          "description": "The Grocy ID of the object."
+        }
+      }
+    },
+    "consume_recipe": {
+      "name": "Consume recipe",
+      "description": "Consumes all ingredients of a recipe.",
+      "fields": {
+        "recipe_id": {
+          "name": "Recipe ID",
+          "description": "The Grocy ID of the recipe."
+        }
+      }
+    },
+    "track_battery": {
+      "name": "Track battery charge",
+      "description": "Tracks a charge cycle for a battery.",
+      "fields": {
+        "battery_id": {
+          "name": "Battery ID",
+          "description": "The Grocy ID of the battery."
+        }
+      }
+    },
+    "add_missing_products_to_shopping_list": {
+      "name": "Add missing products to shopping list",
+      "description": "Adds every product below its minimum stock to a shopping list.",
+      "fields": {
+        "list_id": {
+          "name": "Shopping list ID",
+          "description": "Which shopping list (1 is the default list)."
+        }
+      }
+    },
+    "remove_product_in_shopping_list": {
+      "name": "Remove product from shopping list",
+      "description": "Removes an amount of a product from a shopping list.",
+      "fields": {
+        "product_id": {
+          "name": "Product ID",
+          "description": "The Grocy ID of the product."
+        },
+        "list_id": {
+          "name": "Shopping list ID",
+          "description": "Which shopping list (1 is the default list)."
+        },
+        "amount": {
+          "name": "Amount",
+          "description": "How much, in the product's stock unit."
+        }
+      }
+    },
+    "add_products_by_name": {
+      "name": "Add products by name",
+      "description": "Adds several products to the stock by their Grocy name, e.g. from an AI-read receipt.",
+      "fields": {
+        "items": {
+          "name": "Items",
+          "description": "List of products with name, amount and optional price."
+        }
+      }
+    }
+  }
+}

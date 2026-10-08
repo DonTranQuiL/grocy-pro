@@ -1,26 +1,19 @@
-# Exclude AI runner scripts from the lint runner
+# Integration CI lint gate — keep focused on the HA component + tests.
 exclude = [
-    "ai_engineer",
+  "ai_engineer",
+  ".git",
+  ".venv",
 ]
 
+target-version = "py312"
+line-length = 88
+
 [lint]
-# Suppress non-critical lint rules (same class as Earthquake Tracker / ADSB)
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
 ignore = [
-    "BLE001",  # Do not catch blind exception
-    "TRY002",  # Custom exception creation
-    "PLR1722", # Built-in exit() call
-    "S110",    # try-except-pass logging
-    "B023",    # Loop variable binding
-    "PIE810",  # Multiple startswith calls
-    "DTZ005",  # datetime.now without tz
-    "DTZ001",  # datetime() without tzinfo
-    "TRY401",  # redundant exception in logging.exception
-    "SIM103",  # return negated condition (style)
-    "SIM102",  # nested if (style)
-    "ASYNC230",
-    "RUF059",
-    "DTZ011",
-    "DTZ901",
-    "SIM118",
-    "RUF012",
+  "E501",
+  "BLE001",  # broad Exception around flaky third-party/network calls
 ]
+
+[lint.per-file-ignores]
+"tests/*" = ["B011"]
