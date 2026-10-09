@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Daily check that the Grocy API still works with the grocy-py version Grocy Pro pins.
+"""Daily check that the Grocy API still works with the grocy-py version Grocy Pro bundles.
 
 Runs the same grocy-py calls the integration makes (see
 custom_components/grocy_pro/grocy_data.py and calendar.py) against the public
@@ -17,12 +17,17 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from datetime import date
-from importlib.metadata import version
 from pathlib import Path
 
 import requests
+
+# Use the grocy-py copy bundled with the integration (custom_components/
+# grocy_pro/vendor/grocy), so the check runs exactly what users run.
+VENDOR = Path(__file__).resolve().parent.parent / "custom_components" / "grocy_pro" / "vendor"
+sys.path.insert(0, str(VENDOR))
 
 COMPONENT = "custom_components/grocy_pro/"
 DEMO_URL = "https://demo.grocy.info"
@@ -207,7 +212,7 @@ def main() -> int:
 
     _install_timeout()
     api = Grocy(DEMO_URL, "demo_mode", port=443)
-    grocy_py = version("grocy-py")
+    grocy_py = re.search(r'GROCY_PY_VERSION = "([^"]+)"', (VENDOR / "__init__.py").read_text()).group(1)
 
     previous: dict = {}
     if MEMORY_PATH.is_file():
@@ -271,7 +276,7 @@ def main() -> int:
         lines.append("")
     lines.append(
         "Check for a newer grocy-py release (https://pypi.org/project/grocy-py/) "
-        "and bump it in manifest.json."
+        "and copy it into custom_components/grocy_pro/vendor (see vendor/__init__.py)."
     )
     report = "\n".join(lines)
     summary = llm_summary(report)

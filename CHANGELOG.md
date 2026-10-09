@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.0.2 (2026-10-09)
+
+### Fixed
+
+- Setting up Grocy Pro failed with a raw *restart_required* on systems that
+  still have the old Grocy integration, even after a restart. Both pin their
+  own grocy-py version, which owns the same `grocy` Python module, so Home
+  Assistant kept switching the installed version and the old one stayed in
+  memory. Grocy Pro now bundles grocy-py 1.3.0 (MIT, in `vendor/`) and no
+  longer depends on the installed one: it works next to the old integration,
+  and **Move my old Grocy setup** works while that is still installed. The
+  3.0.1 version check and its repair are gone (a leftover repair is removed).
+- *"Detected blocking call to listdir / read_text / open inside the event
+  loop"* from the 3.0.1 version check (it read package metadata in the
+  loop). The tests now fail on any file or sleep I/O in the event loop from
+  Grocy Pro code; no other blocking calls were found.
+
 ## 3.0.1 (2026-10-09)
 
 ### Fixed

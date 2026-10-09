@@ -7,8 +7,6 @@ from datetime import datetime
 from typing import Any
 
 import requests
-from grocy.errors import GrocyError
-from grocy.grocy import Grocy
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -24,6 +22,8 @@ from .const import (
 )
 from .grocy_data import fetch_grocy_data
 from .helpers import GrocyConnection, connection_from_data, ensure_request_timeout
+from .vendor.grocy.errors import GrocyError
+from .vendor.grocy.grocy import Grocy
 
 type GrocyConfigEntry = ConfigEntry[GrocyDataUpdateCoordinator]
 

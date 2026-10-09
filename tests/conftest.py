@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
+import builtins
+import glob
 import json
+import os
+import sys
+import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -124,3 +131,65 @@ def setup_integration(hass, mock_entry, grocy_server, frozen) -> Callable[[], An
         return mock_entry
 
     return _setup
+
+
+_INTEGRATION_DIR = str(Path(__file__).parent.parent / "custom_components" / DOMAIN)
+_BLOCKING = [
+    (builtins, "open"),
+    (os, "listdir"),
+    (os, "scandir"),
+    (os, "walk"),
+    (os.path, "exists"),
+    (os.path, "isfile"),
+    (glob, "glob"),
+    (time, "sleep"),
+    (Path, "open"),
+    (Path, "read_text"),
+    (Path, "read_bytes"),
+    (Path, "write_text"),
+    (Path, "write_bytes"),
+    (Path, "exists"),
+    (Path, "is_file"),
+    (Path, "is_dir"),
+]
+
+
+@pytest.fixture(autouse=True)
+def no_blocking_io_in_loop(monkeypatch: pytest.MonkeyPatch):
+    """Fail when Grocy Pro does file or sleep I/O inside the event loop.
+
+    Home Assistant only logs these in tests (open, listdir, read_text, ... are
+    skipped there), so check it ourselves: any of these calls, made while an
+    event loop runs in this thread, with Grocy Pro code on the stack, is a
+    "Detected blocking call ... inside the event loop" in a real install.
+    Path.exists/is_file and os.path.exists are checked too; Home Assistant
+    doesn't flag them, but they block just the same.
+    """
+    found: list[str] = []
+    loop_thread = threading.get_ident()
+
+    def guard(func, name):
+        def guarded(*args, **kwargs):
+            if threading.get_ident() == loop_thread:
+                try:
+                    asyncio.get_running_loop()
+                except RuntimeError:
+                    return func(*args, **kwargs)
+                frame = sys._getframe(1)
+                while frame is not None:
+                    filename = frame.f_code.co_filename
+                    if filename.startswith(_INTEGRATION_DIR):
+                        found.append(
+                            f"{name}{args[:1]!r} from "
+                            f"{filename[len(_INTEGRATION_DIR) + 1 :]}:{frame.f_lineno}"
+                        )
+                        break
+                    frame = frame.f_back
+            return func(*args, **kwargs)
+
+        return guarded
+
+    for obj, attr in _BLOCKING:
+        monkeypatch.setattr(obj, attr, guard(getattr(obj, attr), attr))
+    yield found
+    assert not found, f"blocking calls in the event loop: {found}"

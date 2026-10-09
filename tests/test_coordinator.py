@@ -109,7 +109,7 @@ class _Resp:
 
 def test_call_grocy_error_mapping() -> None:
     """grocy-py errors become our two error types."""
-    from grocy.errors import GrocyError
+    from custom_components.grocy_pro.vendor.grocy.errors import GrocyError
 
     def raise_(exc):
         def _f():

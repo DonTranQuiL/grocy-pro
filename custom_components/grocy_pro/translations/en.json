@@ -60,8 +60,7 @@
       "single_instance_allowed": "Grocy Pro is already set up.",
       "reauth_successful": "The API key was updated.",
       "reconfigure_successful": "The connection was updated.",
-      "no_legacy_entry": "No old Grocy setup was found.",
-      "restart_required": "Grocy Pro needs grocy-py {required}, but an older version is still loaded (installed: {installed}). Restart Home Assistant and try again."
+      "no_legacy_entry": "No old Grocy setup was found."
     }
   },
   "exceptions": {
@@ -76,9 +75,6 @@
     },
     "products_not_found": {
       "message": "These products were not found in Grocy and were skipped: {names}"
-    },
-    "restart_required": {
-      "message": "Grocy Pro needs grocy-py {required}, but an older version is still loaded (installed: {installed}). Restart Home Assistant and try again."
     }
   },
   "selector": {
@@ -295,10 +291,6 @@
     "old_card": {
       "title": "Old Grocy dashboard card still loaded",
       "description": "An old copy of the Grocy dashboard card was found: {found}.\n\nGrocy Pro now brings its own card, and the old copy can win and show an outdated version (for example \"Nothing here ??\").\n\n1. Go to **Settings > Dashboards**, open the menu (three dots) > **Resources** and delete the `grocy-action-card.js` resource.\n2. Delete `/config/www/grocy-action-card.js` if it exists.\n3. Reload the browser (or clear the app cache on your phone).\n\nThis message goes away by itself once the old copy is gone and Home Assistant restarts."
-    },
-    "restart_required": {
-      "title": "Restart Home Assistant to finish installing Grocy Pro",
-      "description": "Grocy Pro needs grocy-py {required}. Installed: {installed}. Loaded in memory: {loaded}.\n\nThe old Grocy integration used grocy-py 0.1.0, and Python keeps that version in memory until Home Assistant restarts. **Restart Home Assistant** (Settings > System > Restart) and Grocy Pro will load. If this message stays after a restart, check the log for errors while installing grocy-py."
     }
   }
 }

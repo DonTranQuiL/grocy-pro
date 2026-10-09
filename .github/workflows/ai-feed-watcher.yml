@@ -1,7 +1,7 @@
 name: AI Grocy API Watcher
 
 # Daily check that the Grocy API (public demo, latest Grocy release) still works
-# with the grocy-py version pinned in manifest.json. Opens an issue only when a
+# with the grocy-py version bundled in custom_components/grocy_pro/vendor. Opens an issue only when a
 # check newly fails.
 
 on:
@@ -31,8 +31,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install requests openai
-          # Same grocy-py / icalendar versions the integration installs
+          pip install requests openai pydantic
+          # Same icalendar / tzlocal versions the integration installs (grocy-py is bundled)
           jq -r '.requirements[]' custom_components/grocy_pro/manifest.json | xargs pip install
 
       - name: Run Grocy API Watcher

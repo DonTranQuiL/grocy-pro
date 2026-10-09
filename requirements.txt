@@ -1,2 +1,2 @@
 # Runtime requirements are declared in custom_components/grocy_pro/manifest.json
-# (grocy-py and icalendar); Home Assistant installs them.
+# (icalendar and tzlocal); grocy-py is bundled in vendor/. Home Assistant installs them.

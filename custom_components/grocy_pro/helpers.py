@@ -172,7 +172,7 @@ class _RequestsWithTimeout:
 
 def ensure_request_timeout() -> None:
     """Give grocy-py's HTTP calls a timeout (idempotent)."""
-    import grocy.grocy_api_client as grocy_api_client  # noqa: PLC0415
+    from .vendor.grocy import grocy_api_client  # noqa: PLC0415
 
     if not isinstance(grocy_api_client.requests, _RequestsWithTimeout):
         grocy_api_client.requests = _RequestsWithTimeout(

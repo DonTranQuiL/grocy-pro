@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from grocy.data_models.generic import EntityType
 from homeassistant.components.todo import (
     TodoItem,
     TodoItemStatus,
@@ -25,6 +24,7 @@ from .coordinator import (
     call_grocy,
 )
 from .entity import GrocyEntity
+from .vendor.grocy.data_models.generic import EntityType
 
 
 def find_product_id(products: list[Any], name: str) -> int | None:

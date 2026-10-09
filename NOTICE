@@ -17,8 +17,10 @@ field names, the ProductWrapper/MealPlanItemWrapper picture helpers) are
 provided under the Apache License 2.0 terms for that material, and are modified
 from the originals.
 
-Runtime dependency (not bundled): grocy-py - https://github.com/iamkarlson/grocy-py
-(MIT License).
+Bundled: grocy-py 1.3.0 - https://github.com/iamkarlson/grocy-py
+  MIT License, Copyright (c) 2019 Sebastian Rutofski and contributors.
+  Included unchanged in custom_components/grocy_pro/vendor/grocy (license
+  text in vendor/grocy/LICENSE).
 
 Grocy itself (https://grocy.info) is by Bernd Bestel and licensed under the MIT
 License. Grocy Pro is not affiliated with the Grocy project.

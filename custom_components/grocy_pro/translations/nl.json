@@ -60,8 +60,7 @@
       "single_instance_allowed": "Grocy Pro is al ingesteld.",
       "reauth_successful": "De API-sleutel is bijgewerkt.",
       "reconfigure_successful": "De verbinding is bijgewerkt.",
-      "no_legacy_entry": "Geen oude Grocy-instelling gevonden.",
-      "restart_required": "Grocy Pro heeft grocy-py {required} nodig, maar er is nog een oudere versie geladen (geïnstalleerd: {installed}). Herstart Home Assistant en probeer het opnieuw."
+      "no_legacy_entry": "Geen oude Grocy-instelling gevonden."
     }
   },
   "exceptions": {
@@ -76,9 +75,6 @@
     },
     "products_not_found": {
       "message": "Deze producten staan niet in Grocy en zijn overgeslagen: {names}"
-    },
-    "restart_required": {
-      "message": "Grocy Pro heeft grocy-py {required} nodig, maar er is nog een oudere versie geladen (geïnstalleerd: {installed}). Herstart Home Assistant en probeer het opnieuw."
     }
   },
   "selector": {
@@ -295,10 +291,6 @@
     "old_card": {
       "title": "Oude Grocy-dashboardkaart nog geladen",
       "description": "Er is een oude kopie van de Grocy-dashboardkaart gevonden: {found}.\n\nGrocy Pro levert nu zijn eigen kaart mee, en de oude kopie kan voorgaan en een verouderde versie tonen (bijvoorbeeld \"Nothing here ??\").\n\n1. Ga naar **Instellingen > Dashboards**, open het menu (drie puntjes) > **Bronnen** en verwijder de bron `grocy-action-card.js`.\n2. Verwijder `/config/www/grocy-action-card.js` als die bestaat.\n3. Herlaad de browser (of wis de app-cache op je telefoon).\n\nDeze melding verdwijnt vanzelf zodra de oude kopie weg is en Home Assistant opnieuw is gestart."
-    },
-    "restart_required": {
-      "title": "Herstart Home Assistant om Grocy Pro af te ronden",
-      "description": "Grocy Pro heeft grocy-py {required} nodig. Geïnstalleerd: {installed}. In het geheugen geladen: {loaded}.\n\nDe oude Grocy-integratie gebruikte grocy-py 0.1.0, en Python houdt die versie in het geheugen tot Home Assistant herstart. **Herstart Home Assistant** (Instellingen > Systeem > Herstarten) en Grocy Pro laadt. Blijft deze melding na een herstart, kijk dan in het logboek naar fouten bij het installeren van grocy-py."
     }
   }
 }

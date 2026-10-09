@@ -75,7 +75,7 @@ def test_request_timeout_wrapper() -> None:
     assert calls == [{"timeout": 7}, {"timeout": 1}]
     assert wrapped.RequestException is RuntimeError
 
-    from grocy import grocy_api_client
+    from custom_components.grocy_pro.vendor.grocy import grocy_api_client
 
     ensure_request_timeout()
     ensure_request_timeout()

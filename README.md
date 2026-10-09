@@ -110,7 +110,7 @@ Up to 2.x this repository installed into `custom_components/grocy` with the doma
 
 1. **Restart Home Assistant first.** HACS works out the install folder of a repository when Home Assistant starts. Without a restart it still uses the old `custom_components/grocy` path, and the download fails with *"No manifest.json file found 'custom_components/grocy/manifest.json'"* (or empties the old folder without installing anything).
 2. **Download Grocy Pro 3.x in HACS** (open the repository, it may still be called *Grocy*: ⋮ → **Redownload** → latest version). It installs into `custom_components/grocy_pro`. If it still fails, use the [HACS fix](#hacs-download-fails-with-the-old-grocy-path) below.
-3. **Restart Home Assistant** again. This also loads the grocy-py library version Grocy Pro needs (until then Grocy Pro shows a *Restart Home Assistant* repair).
+3. **Restart Home Assistant** again.
 4. **Settings → Devices & services → Add integration → Grocy Pro.** Grocy Pro sees your old Grocy setup and offers **Move my old Grocy setup**. Pick it: Grocy Pro reuses the URL and API key, removes the old Grocy entry and sets itself up.
 5. **Update your automations and scripts**: actions are now called `grocy_pro.*` instead of `grocy.*` (search and replace `grocy.` → `grocy_pro.` in your action calls).
 6. **Remove the old card resource**: if you added `/local/grocy-action-card.js` under **Settings → Dashboards → Resources**, delete it and the file in `/config/www/`. The card now comes with the integration. Your `type: custom:grocy-action-card` cards keep working.
@@ -260,7 +260,7 @@ automation:
 
 ## How it works
 
-Grocy Pro talks to the [Grocy REST API](https://demo.grocy.info/api) through [grocy-py](https://github.com/iamkarlson/grocy-py):
+Grocy Pro talks to the [Grocy REST API](https://demo.grocy.info/api) through [grocy-py](https://github.com/iamkarlson/grocy-py) (bundled in `vendor/`, so it never clashes with the grocy-py version of the old Grocy integration):
 
 - Every 30 s it asks `/system/db-changed-time`. Only when that changes (or after 5 minutes) it downloads stock, the volatile stock (one call for expiring, overdue, expired and missing products), the shopping list, chores, tasks, batteries and the meal plan.
 - The calendar is read from Grocy's iCal feed every 15 minutes.
@@ -274,7 +274,7 @@ A daily [API watcher](.github/workflows/ai-feed-watcher.yml) runs the same calls
 | --- | --- |
 | HACS says *"Repository removed from HACS"* / *"The owner has removed it"* | That message is about the custom-components/grocy entry HACS still has on record, not this repository. Follow [Upgrading from 2.x](#upgrading-from-2x-the-grocy-domain) and remove that entry in HACS. |
 | HACS: *"No manifest.json file found 'custom_components/grocy/manifest.json'"* | HACS still uses the old folder. See [HACS download fails with the old grocy path](#hacs-download-fails-with-the-old-grocy-path). |
-| *cannot import name 'EntityType' from 'grocy'* (3.0.0), or the repair *Restart Home Assistant to finish installing Grocy Pro* | The old Grocy integration's library (grocy-py 0.1.0) is still loaded in memory. Restart Home Assistant. Fixed in 3.0.1: it shows the repair instead of failing. |
+| *cannot import name 'EntityType' from 'grocy'* (3.0.0), or a raw *restart_required* when adding Grocy Pro (3.0.1) | The old Grocy integration's grocy-py 0.1.0 clashed with Grocy Pro's. Update to 3.0.2 or newer: Grocy Pro now brings its own copy of grocy-py and works next to the old integration. |
 | *Cannot reach Grocy* | Check the URL and port from Home Assistant's point of view. For the add-on, expose port 9192 (see the tip above). |
 | *That address answered, but not like a Grocy server* | Wrong port or sub path, or a login page in front of Grocy. Open `<url>:<port>/api/system/info` in a browser: it should show JSON. |
 | *Grocy rejected the API key* / re-authenticate | Create a new API key in Grocy and enter it. |

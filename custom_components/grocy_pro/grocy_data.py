@@ -8,9 +8,6 @@ from datetime import date, datetime
 from typing import Any
 
 from aiohttp import ClientError, ClientTimeout, hdrs, web
-from grocy.data_models.generic import EntityType
-from grocy.data_models.product import Product
-from grocy.grocy import Grocy
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -36,6 +33,9 @@ from .const import (
     REQUEST_TIMEOUT,
 )
 from .helpers import MealPlanItemWrapper, ProductWrapper
+from .vendor.grocy.data_models.generic import EntityType
+from .vendor.grocy.data_models.product import Product
+from .vendor.grocy.grocy import Grocy
 
 
 def _is_past(value: Any, now: datetime) -> bool:

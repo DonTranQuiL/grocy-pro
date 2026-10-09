@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC
 
-from grocy import Grocy
-
 from custom_components.grocy_pro.const import FEATURE_ENTITIES
 from custom_components.grocy_pro.grocy_data import _is_past, fetch_grocy_data
 from custom_components.grocy_pro.helpers import as_attribute
+from custom_components.grocy_pro.vendor.grocy import Grocy
 
 ALL_KEYS = [key for keys in FEATURE_ENTITIES.values() for key in keys]
 

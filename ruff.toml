@@ -3,6 +3,7 @@ exclude = [
   "ai_engineer",
   ".git",
   ".venv",
+  "custom_components/grocy_pro/vendor",
 ]
 
 target-version = "py312"

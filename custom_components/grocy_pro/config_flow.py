@@ -31,9 +31,6 @@ from .const import (
     REQUEST_TIMEOUT,
 )
 from .helpers import connection_from_data
-from .library import library_problem
-
-ISSUE_RESTART = "restart_required"
 
 CONNECTION_KEYS = (CONF_URL, CONF_API_KEY, CONF_PORT, CONF_VERIFY_SSL)
 
@@ -106,10 +103,6 @@ class GrocyFlowHandler(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Start: offer to move an old Grocy setup over, or set up manually."""
-        if (problem := library_problem()) is not None:
-            return self.async_abort(
-                reason=ISSUE_RESTART, description_placeholders=problem
-            )
         if user_input is None and self._legacy_entry() is not None:
             return self.async_show_menu(
                 step_id="user", menu_options=["import_legacy", "manual"]
