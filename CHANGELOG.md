@@ -1,6 +1,13 @@
 # Changelog
 
-## 3.0.0
+## 3.0.0 (2026-10-09)
+
+Stable release of 3.0.0-beta.1 with no code changes. It had to become the
+latest stable release: HACS takes the install folder from the latest stable
+release, so while that was 2.0.0 (domain `grocy`), installing the beta failed
+with *"No manifest.json file found 'custom_components/grocy/manifest.json'"*.
+If you see that error, remove the repository from HACS, restart Home Assistant
+and add it again.
 
 A rewrite with its own domain. **Breaking:** read the upgrade steps in the
 [README](README.md#upgrading-from-2x-the-grocy-domain).
