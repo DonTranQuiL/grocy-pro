@@ -286,5 +286,11 @@
         }
       }
     }
+  },
+  "issues": {
+    "old_card": {
+      "title": "Old Grocy dashboard card still loaded",
+      "description": "An old copy of the Grocy dashboard card was found: {found}.\n\nGrocy Pro now brings its own card, and the old copy can win and show an outdated version (for example \"Nothing here ??\").\n\n1. Go to **Settings > Dashboards**, open the menu (three dots) > **Resources** and delete the `grocy-action-card.js` resource.\n2. Delete `/config/www/grocy-action-card.js` if it exists.\n3. Reload the browser (or clear the app cache on your phone).\n\nThis message goes away by itself once the old copy is gone and Home Assistant restarts."
+    }
   }
 }

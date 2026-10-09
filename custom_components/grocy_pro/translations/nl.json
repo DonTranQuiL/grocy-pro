@@ -286,5 +286,11 @@
         }
       }
     }
+  },
+  "issues": {
+    "old_card": {
+      "title": "Oude Grocy-dashboardkaart nog geladen",
+      "description": "Er is een oude kopie van de Grocy-dashboardkaart gevonden: {found}.\n\nGrocy Pro levert nu zijn eigen kaart mee, en de oude kopie kan voorgaan en een verouderde versie tonen (bijvoorbeeld \"Nothing here ??\").\n\n1. Ga naar **Instellingen > Dashboards**, open het menu (drie puntjes) > **Bronnen** en verwijder de bron `grocy-action-card.js`.\n2. Verwijder `/config/www/grocy-action-card.js` als die bestaat.\n3. Herlaad de browser (of wis de app-cache op je telefoon).\n\nDeze melding verdwijnt vanzelf zodra de oude kopie weg is en Home Assistant opnieuw is gestart."
+    }
   }
 }

@@ -22,9 +22,11 @@ A rewrite with its own domain. **Breaking:** read the upgrade steps in the
 
 - Calendar entity from Grocy's iCal feed (due products, chores, tasks,
   batteries, meal plan).
-- The dashboard card ships with the integration and loads automatically. It
-  is listed in the card picker and accepts `locations`, `entity_prefix` and
-  `domain` options.
+- The dashboard card ships with the integration and loads automatically, is
+  listed in the card picker and has a visual editor. Options: `title`,
+  `locations`, `entity_prefix`, `show_pictures`, `show_log`, `confirm_delete`.
+- Repair issue when an old copy of the card (`/local/grocy-action-card.js`)
+  is still loaded and would override the new one.
 - Re-authentication when the API key is rejected, and Reconfigure to change the
   connection.
 - Diagnostics download (API key and URL redacted).
@@ -54,10 +56,31 @@ A rewrite with its own domain. **Breaking:** read the upgrade steps in the
 - The picture proxy forwarded `Content-Encoding`/`Content-Length` from Grocy,
   corrupting compressed responses; it also registered twice on reload.
 - Grocy errors in actions now show a readable message instead of a stack trace.
-- Card: removing a shopping list item crashed (undefined variable) and ignored
-  the amount; product names are HTML-escaped; amounts are no longer rounded to
-  whole numbers; the fake startup log lines are gone; a second copy of the card
-  no longer throws "already defined".
+- Card, reviewed line by line:
+  - "Nothing here ??": the empty-section emoji was mangled by a non-UTF-8
+    copy. The source is now ASCII-only (`\u` escapes), enforced by a test.
+  - Follows the Home Assistant theme (light and dark) instead of hard-coded
+    colours, no longer downloads Google Fonts, and its styles live in a shadow
+    root so they can't leak into the rest of the dashboard.
+  - Re-rendered on every state change anywhere in Home Assistant; now only
+    when one of its five entities changes. One click listener instead of new
+    listeners per render.
+  - Items you acted on stayed hidden until a page reload, so a recurring chore
+    disappeared for good after "Done". They now come back with fresh data.
+  - All Grocy text (names, notes, picture URLs, location names, title) is
+    HTML-escaped.
+  - Errors show the reason in the log and the button can be used again.
+  - Missing entities (or a wrong `entity_prefix`) and an unreachable Grocy show
+    a notice instead of "all clear".
+  - The bin icon deletes the task or chore in Grocy; it now asks first.
+  - Dates are read as local calendar days (no off-by-one), Grocy's "never"
+    date shows "No due date", and chores/tasks say "due" instead of "expires".
+  - Removing a shopping list item crashed (undefined variable) and ignored the
+    amount; amounts are no longer rounded to whole numbers; a second copy of
+    the card no longer throws "already defined".
+  - One column on narrow cards (container query, also in Sections), buttons
+    wrap on phones; visual editor and Sections grid size.
+  - The card URL carries a content hash, so browsers load every new version.
 - Manifest: documentation and issue tracker pointed at the old repository;
   codeowner typo.
 

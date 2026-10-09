@@ -24,7 +24,7 @@
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/qaHPTTKHae)
 [![Ko-fi](https://img.shields.io/badge/buy%20me%20a%20coffee-ko--fi-ff5e5b?style=flat-square&logo=kofi&logoColor=white)](https://ko-fi.com/DonTranQuiL)
 
-[Install](#installation) · [Upgrading from 2.x](#upgrading-from-2x-the-grocy-domain) · [Entities](#entities) · [Actions](#actions) · [Dashboard card](#dashboard-card) · [Examples](#automation-examples) · [Troubleshooting](#troubleshooting) · [Docs site](https://dontranquil.github.io/grocy-pro/)
+[Dashboard card](#dashboard-card) · [Install](#installation) · [Upgrading from 2.x](#upgrading-from-2x-the-grocy-domain) · [Entities](#entities) · [Actions](#actions) · [Examples](#automation-examples) · [Troubleshooting](#troubleshooting) · [Docs site](https://dontranquil.github.io/grocy-pro/)
 
 </div>
 
@@ -41,6 +41,32 @@
 | 🪶 **Light on your server** | Polls Grocy's cheap "database changed" endpoint every 30 s and only downloads data when something changed (or every 5 minutes so due dates roll over). |
 | 🔐 **Clean setup** | UI setup with connection check, re-authentication when the API key stops working, reconfigure, diagnostics with the key and URL redacted. |
 | 🇳🇱 **English and Dutch** | The UI and actions are translated into both. |
+
+## Dashboard card
+
+![Grocy Pro Command Center card](docs/images/card.png)
+
+The **Grocy Pro Command Center** card shows what needs attention (overdue tasks, expired products, batteries to charge), your stock by location, the shopping list, chores and tasks, with one-tap buttons: done, open, consume, waste, charged, remove. It is loaded by the integration, so there is no resource to add: pick it in the card picker or paste this:
+
+```yaml
+type: custom:grocy-action-card
+```
+
+All options are optional:
+
+```yaml
+type: custom:grocy-action-card
+title: Kitchen            # header text (default: Grocy Pro)
+locations:                # Grocy location ID -> name
+  1: Pantry               # defaults: 1 Pantry, 2 Fridge, 3 Freezer, 4 Cupboards
+  5: Garage
+entity_prefix: grocy      # if you renamed the entities, e.g. sensor.kitchen_stock -> kitchen
+show_pictures: true       # product pictures from Grocy
+show_log: true            # short log of the actions you took, with errors
+confirm_delete: true      # ask before the bin icon deletes a task or chore in Grocy
+```
+
+`title`, `entity_prefix` and the switches can also be set in the visual editor. The card follows your Home Assistant theme (light or dark), switches to one column on narrow screens and works in Sections, Masonry and Panel views. An item disappears right after you tap it; the integration refreshes its data straight after every action.
 
 ## Installation
 
@@ -142,22 +168,6 @@ The IDs are the numbers in Grocy's URLs (for example `.../product/12`) and in th
 
 Chores are tracked at their scheduled time by default (like the original integration). Set `track_execution_now: true` to track them now.
 
-## Dashboard card
-
-The **Grocy Pro Command Center** card shows overdue items, your pantry by location, tasks, chores and the shopping list, with one-tap buttons (done, consume, open, waste, charge, remove). It's loaded automatically by the integration and appears in the card picker.
-
-```yaml
-type: custom:grocy-action-card
-# Optional:
-locations:          # Grocy location IDs -> names (defaults: 1 Pantry, 2 Fridge, 3 Freezer, 4 Cupboards)
-  1: Pantry
-  5: Garage
-entity_prefix: grocy  # if you renamed the entities, e.g. sensor.kitchen_stock -> kitchen
-domain: grocy_pro     # action domain, only change it for testing
-```
-
-Use a **Sections** or **Panel** view to give the card room. It hides items right after you tap them and the data refreshes immediately after each action.
-
 ## Automation examples
 
 Tap an NFC tag to feed the dog and tick off the chore:
@@ -256,7 +266,8 @@ A daily [API watcher](.github/workflows/ai-feed-watcher.yml) runs the same calls
 | *Grocy rejected the API key* / re-authenticate | Create a new API key in Grocy and enter it. |
 | Some entities are missing | The matching feature is turned off in Grocy (`FEATURE_FLAG_*` in Grocy's config). |
 | Entities have a `_2` suffix | The old `grocy` entities still existed. See the last paragraph of the upgrade section. |
-| Card shows *Custom element doesn't exist* | Hard-refresh the browser (Ctrl+Shift+R). If you still have the old `/local/grocy-action-card.js` resource, remove it. |
+| Card shows *Custom element doesn't exist* | Hard-refresh the browser (Ctrl+Shift+R), or clear the app cache on your phone. |
+| Card looks old or says *"Nothing here ??"* | An old copy of the card (from 2.x) is still loaded and wins. Grocy Pro shows a repair for this under **Settings > System > Repairs**. Remove the `/local/grocy-action-card.js` resource (Settings > Dashboards > ⋮ > Resources) and `/config/www/grocy-action-card.js`, then reload. |
 | Times in the calendar are off by your UTC offset | Set Grocy's timezone (the `TZ` / PHP timezone of the Grocy container) to your local zone. |
 
 Debug logs:
