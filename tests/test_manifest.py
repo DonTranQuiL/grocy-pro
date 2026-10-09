@@ -29,6 +29,18 @@ def test_manifest_version_matches_const() -> None:
     assert "DonTranQuiL/grocy-pro" in manifest["issue_tracker"]
 
 
+def test_manifest_version_is_valid() -> None:
+    """Home Assistant parses the version with AwesomeVersion (PEP 440 / SemVer)."""
+    from awesomeversion import AwesomeVersion, AwesomeVersionStrategy
+
+    version = AwesomeVersion(_json(COMPONENT / "manifest.json")["version"])
+    assert version.strategy in (
+        AwesomeVersionStrategy.PEP440,
+        AwesomeVersionStrategy.SEMVER,
+        AwesomeVersionStrategy.SIMPLEVER,
+    )
+
+
 def test_hacs_json() -> None:
     """hacs.json has no deprecated keys."""
     hacs = _json(ROOT / "hacs.json")
