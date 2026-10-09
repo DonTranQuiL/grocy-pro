@@ -8,8 +8,9 @@ from datetime import date, datetime
 from typing import Any
 
 from aiohttp import ClientError, ClientTimeout, hdrs, web
-from grocy import EntityType, Grocy
+from grocy.data_models.generic import EntityType
 from grocy.data_models.product import Product
+from grocy.grocy import Grocy
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession

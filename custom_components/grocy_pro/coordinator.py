@@ -7,8 +7,8 @@ from datetime import datetime
 from typing import Any
 
 import requests
-from grocy import Grocy
 from grocy.errors import GrocyError
+from grocy.grocy import Grocy
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed

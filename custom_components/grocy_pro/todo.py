@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from grocy import EntityType
+from grocy.data_models.generic import EntityType
 from homeassistant.components.todo import (
     TodoItem,
     TodoItemStatus,

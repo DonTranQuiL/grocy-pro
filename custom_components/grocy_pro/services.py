@@ -7,7 +7,8 @@ from datetime import datetime
 from typing import Any
 
 import voluptuous as vol
-from grocy import EntityType, TransactionType
+from grocy.data_models.generic import EntityType
+from grocy.grocy_api_client import TransactionType
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv

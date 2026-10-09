@@ -10,7 +10,7 @@ LOGGER = logging.getLogger(__package__)
 
 DOMAIN: Final = "grocy_pro"
 NAME: Final = "Grocy Pro"
-VERSION: Final = "3.0.0"
+VERSION: Final = "3.0.1"
 
 # The device keeps the plain "Grocy" name so entity IDs stay sensor.grocy_*,
 # exactly as with the old `grocy` domain. Dashboards and the card keep working.

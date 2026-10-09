@@ -1,5 +1,27 @@
 # Changelog
 
+## 3.0.1 (2026-10-09)
+
+### Fixed
+
+- *"Error occurred loading flow for integration grocy_pro: cannot import name
+  'EntityType' from 'grocy'"*. The old Grocy integration loaded grocy-py 0.1.0
+  (which owns the same `grocy` module). Home Assistant installs grocy-py 1.3.0
+  for Grocy Pro on disk, but Python keeps 0.1.0 in memory until a restart.
+  Grocy Pro now imports only from module paths that exist in both versions,
+  checks which version is really loaded, and shows a **Restart Home
+  Assistant** repair (and a clear message in the setup dialog) instead of
+  failing.
+- The *"Detected blocking call to import_module ... config_flow inside the
+  event loop"* warning: Home Assistant retries a failed import in the event
+  loop, so it went away with the import fix.
+
+### Docs
+
+- Upgrade steps and troubleshooting for the HACS download failing with the
+  old `custom_components/grocy` path (restart Home Assistant before
+  downloading; remove, restart and re-add if it already failed).
+
 ## 3.0.0 (2026-10-09)
 
 Stable release of 3.0.0-beta.1 with no code changes. It had to become the
