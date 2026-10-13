@@ -78,3 +78,4 @@ FEATURE_ENTITIES: Final = {
     "FEATURE_FLAG_RECIPES": (ATTR_MEAL_PLAN,),
     "FEATURE_FLAG_BATTERIES": (ATTR_BATTERIES, ATTR_OVERDUE_BATTERIES),
 }
+# ai-review smoke test (PR will be closed, not merged)
