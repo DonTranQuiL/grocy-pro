@@ -7,7 +7,9 @@
     "db_changed_time": [],
     "meal_plan": [],
     "shopping_list": [],
-    "stock": [],
+    "stock": [
+      "stock returned no products (demo should have stock)"
+    ],
     "tasks": [],
     "volatile": []
   },
