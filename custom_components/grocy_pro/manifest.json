@@ -17,7 +17,7 @@
   "issue_tracker": "https://github.com/DonTranQuiL/grocy-pro/issues",
   "requirements": [
     "icalendar>=6.3.1",
-    "tzlocal>=5.2,<6"
+    "tzlocal>=5.4.4"
   ],
   "single_config_entry": true,
   "version": "3.0.2"
