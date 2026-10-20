@@ -4,10 +4,6 @@
   "after_dependencies": [
     "frontend"
   ],
-  "categories": [
-    "productivity_information.shopping_groceries",
-    "productivity_information.calendars_todos"
-  ],
   "codeowners": [
     "@DonTranQuiL"
   ],
