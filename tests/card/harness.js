@@ -152,6 +152,33 @@ async function click(card, selector) {
     c.editor_label = form ? form.computeLabel({ name: "entity_prefix" }) : "";
     form.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...form.data, title: "Kitchen", show_log: false } } }));
     c.editor_config = changed;
+
+    // due_within_days: overdue chores plus those due within N days.
+    const choreNames = (cardEl) => [...cardEl.shadowRoot.querySelectorAll('button[data-action="execute_chore"]')]
+      .map((b) => b.closest(".item").querySelector(".name").textContent);
+    const iso = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+    const due = JSON.parse(JSON.stringify(STATES));
+    due["sensor.grocy_chores"].attributes.chores = [
+      { id: 1, name: "Late", next_estimated_execution_time: iso(-3), track_date_only: true, period_type: "weekly", period_interval: 1 },
+      { id: 2, name: "Today", next_estimated_execution_time: iso(0), track_date_only: true, period_type: "weekly", period_interval: 2 },
+      { id: 3, name: "Tomorrow", next_estimated_execution_time: iso(1), track_date_only: true, period_type: "daily", period_interval: 3 },
+      { id: 4, name: "Later", next_estimated_execution_time: iso(5), track_date_only: true, period_type: "monthly", period_interval: 1 },
+      { id: 5, name: "Never", next_estimated_execution_time: null, period_type: "manually" },
+    ];
+    c.due_all = choreNames(await newCard({}, due)).sort();
+    c.due_within_1 = choreNames(await newCard({ due_within_days: 1 }, due)).sort();
+    c.due_within_0 = choreNames(await newCard({ due_within_days: 0 }, due)).sort();
+    try { document.createElement("grocy-action-card").setConfig({ due_within_days: "x" }); c.bad_due = "accepted"; } catch (err) { c.bad_due = "rejected"; }
+
+    // track_execution_now: off sends nothing extra; on only for interval chores.
+    const doneCalls = async (config) => {
+      const cardEl = await newCard(config, due);
+      const start = results.calls.length;
+      for (const id of [1, 2, 3, 4]) await click(cardEl, `button[data-action="execute_chore"][data-id="${id}"]`);
+      return results.calls.slice(start).filter((x) => x.service === "execute_chore").map((x) => x.data);
+    };
+    c.done_default = await doneCalls({});
+    c.done_track_now = await doneCalls({ track_execution_now: true });
   } catch (err) {
     results.errors.push(`harness: ${err && err.stack ? err.stack : err}`);
   }

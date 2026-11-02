@@ -16,6 +16,7 @@ const DEFAULTS = {
   show_pictures: true,
   show_log: true,
   confirm_delete: true,
+  track_execution_now: false,
 };
 
 const DEFAULT_LOCATIONS = { 1: "Pantry", 2: "Fridge", 3: "Freezer", 4: "Cupboards" };
@@ -33,6 +34,17 @@ const OPTIMISTIC_MAX_MS = 120000; // never hide a handled item longer than this
 const OPTIMISTIC_MIN_MS = 2000; // ignore data updates that raced the action
 const LOG_LINES = 6;
 const DAY_MS = 86400000;
+
+// Chores whose next date is a fixed calendar slot ("every week", "every
+// month", "every year"). Done keeps that slot; for every other chore
+// `track_execution_now` makes a late Done count from today.
+const FIXED_SLOT_PERIODS = ["weekly", "monthly", "yearly"];
+
+export function tracksNow(chore) {
+  if (!chore) return false;
+  const interval = Number(chore.period_interval ?? 1) || 1;
+  return !(FIXED_SLOT_PERIODS.includes(chore.period_type) && interval === 1);
+}
 
 const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;" };
 
@@ -220,6 +232,11 @@ class GrocyActionCard extends HTMLElement {
     if (config && config.locations && typeof config.locations !== "object") {
       throw new Error("locations must be a map of Grocy location ID to name");
     }
+    const within = config ? config.due_within_days : undefined;
+    if (within !== undefined && within !== null && within !== ""
+        && !(typeof within === "number" && Number.isFinite(within) && within >= 0)) {
+      throw new Error("due_within_days must be a number of days (0 or more)");
+    }
     this._config = { ...DEFAULTS, ...(config || {}) };
     this._signature = null;
     if (this._hass) this._render();
@@ -305,16 +322,20 @@ class GrocyActionCard extends HTMLElement {
       (item.overdue ? overdue : tasks).push(item);
     }
 
+    const within = typeof cfg.due_within_days === "number" ? cfg.due_within_days : null;
     for (const chore of this._list("chores")) {
       if (this._isHidden("chore", chore.id)) continue;
       const when = chore.next_estimated_execution_time;
       const days = daysUntil(when, now);
       const date = parseDate(when);
-      chores.push({
+      const item = {
         type: "chore", id: chore.id, name: chore.name || chore.chore_name || `Chore ${chore.id}`,
         meta: dueText(when, now),
         overdue: days !== null && (days < 0 || (days === 0 && !chore.track_date_only && date && date < now)),
-      });
+      };
+      // due_within_days: overdue chores plus those due in the next N days.
+      if (within !== null && !item.overdue && (days === null || days > within)) continue;
+      chores.push(item);
     }
 
     for (const battery of this._list("batteries")) {
@@ -508,6 +529,10 @@ class GrocyActionCard extends HTMLElement {
     };
     const call = calls[action];
     if (!call) return;
+    if (action === "execute_chore" && this._config.track_execution_now) {
+      const chore = this._list("chores").find((c) => Number(c.id) === id);
+      if (tracksNow(chore)) call[1].track_execution_now = true;
+    }
     if (action === "delete" && this._config.confirm_delete) {
       // eslint-disable-next-line no-alert
       if (!window.confirm(`Delete "${item.name}" from Grocy? This can't be undone.`)) return;
@@ -549,6 +574,8 @@ const EDITOR_SCHEMA = [
   { name: "show_pictures", selector: { boolean: {} } },
   { name: "show_log", selector: { boolean: {} } },
   { name: "confirm_delete", selector: { boolean: {} } },
+  { name: "due_within_days", selector: { number: { min: 0, mode: "box" } } },
+  { name: "track_execution_now", selector: { boolean: {} } },
 ];
 
 const EDITOR_LABELS = {
@@ -557,6 +584,8 @@ const EDITOR_LABELS = {
   show_pictures: "Show product pictures",
   show_log: "Show the action log",
   confirm_delete: "Ask before deleting tasks and chores",
+  due_within_days: "Only show chores overdue or due within this many days",
+  track_execution_now: "Done counts a late interval chore from today",
 };
 
 class GrocyActionCardEditor extends HTMLElement {
@@ -578,7 +607,7 @@ class GrocyActionCardEditor extends HTMLElement {
       this._form.addEventListener("value-changed", (ev) => {
         const config = { ...this._config, ...ev.detail.value };
         for (const [key, value] of Object.entries(config)) {
-          if (key !== "type" && DEFAULTS[key] === value) delete config[key];
+          if (key !== "type" && (DEFAULTS[key] === value || value === undefined || value === null || value === "")) delete config[key];
         }
         this._config = config;
         this.dispatchEvent(new CustomEvent("config-changed", { detail: { config }, bubbles: true, composed: true }));

@@ -162,12 +162,26 @@ async def test_card_in_browser(
         "show_pictures",
         "show_log",
         "confirm_delete",
+        "due_within_days",
+        "track_execution_now",
     ]
     assert checks["editor_config"] == {
         "type": "custom:grocy-action-card",
         "title": "Kitchen",
         "show_log": False,
     }
+
+    assert checks["due_all"] == ["Late", "Later", "Never", "Today", "Tomorrow"]
+    assert checks["due_within_1"] == ["Late", "Today", "Tomorrow"]
+    assert checks["due_within_0"] == ["Late", "Today"]
+    assert checks["bad_due"] == "rejected"
+    assert checks["done_default"] == [{"chore_id": i} for i in (1, 2, 3, 4)]
+    assert checks["done_track_now"] == [
+        {"chore_id": 1},
+        {"chore_id": 2, "track_execution_now": True},
+        {"chore_id": 3, "track_execution_now": True},
+        {"chore_id": 4},
+    ]
 
     # Every payload the card sent is accepted by the real action schemas and
     # reaches Grocy.
