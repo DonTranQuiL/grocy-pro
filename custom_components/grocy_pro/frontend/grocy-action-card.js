@@ -35,15 +35,29 @@ const OPTIMISTIC_MIN_MS = 2000; // ignore data updates that raced the action
 const LOG_LINES = 6;
 const DAY_MS = 86400000;
 
-// Chores whose next date is a fixed calendar slot ("every week", "every
-// month", "every year"). Done keeps that slot; for every other chore
-// `track_execution_now` makes a late Done count from today.
+// Grocy puts the next date of these chores on a calendar slot (a weekday, a
+// day of the month, a day of the year) for every interval, so Done keeps that
+// slot. Tracking now would move the slot a whole period when Done is early or
+// crosses into the next week, month or year.
 const FIXED_SLOT_PERIODS = ["weekly", "monthly", "yearly"];
 
-export function tracksNow(chore) {
+/**
+ * Whether Done (with `track_execution_now`) tracks the chore now. Daily,
+ * hourly, adaptive and manual chores count from today. A calendar chore keeps
+ * its slot unless Done is a whole period late: the slot would then give a
+ * next date that has already passed.
+ */
+export function tracksNow(chore, now = new Date()) {
   if (!chore) return false;
+  if (!FIXED_SLOT_PERIODS.includes(chore.period_type)) return true;
+  const slot = parseDate(chore.next_estimated_execution_time);
+  if (!slot) return true;
   const interval = Number(chore.period_interval ?? 1) || 1;
-  return !(FIXED_SLOT_PERIODS.includes(chore.period_type) && interval === 1);
+  const next = new Date(slot);
+  if (chore.period_type === "weekly") next.setDate(next.getDate() + 7 * interval);
+  else if (chore.period_type === "monthly") next.setMonth(next.getMonth() + interval);
+  else next.setFullYear(next.getFullYear() + interval);
+  return now >= next;
 }
 
 const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;" };
@@ -585,7 +599,7 @@ const EDITOR_LABELS = {
   show_log: "Show the action log",
   confirm_delete: "Ask before deleting tasks and chores",
   due_within_days: "Only show chores overdue or due within this many days",
-  track_execution_now: "Done counts a late interval chore from today",
+  track_execution_now: "Done counts a daily or hourly chore from today",
 };
 
 class GrocyActionCardEditor extends HTMLElement {

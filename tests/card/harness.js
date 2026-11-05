@@ -170,15 +170,39 @@ async function click(card, selector) {
     c.due_within_0 = choreNames(await newCard({ due_within_days: 0 }, due)).sort();
     try { document.createElement("grocy-action-card").setConfig({ due_within_days: "x" }); c.bad_due = "accepted"; } catch (err) { c.bad_due = "rejected"; }
 
-    // track_execution_now: off sends nothing extra; on only for interval chores.
-    const doneCalls = async (config) => {
-      const cardEl = await newCard(config, due);
+    // track_execution_now: off sends nothing extra; on tracks daily-like chores
+    // now, and calendar chores only when Done is a whole period late.
+    const doneCalls = async (config, states = due, ids = [1, 2, 3, 4]) => {
+      const cardEl = await newCard(config, states);
       const start = results.calls.length;
-      for (const id of [1, 2, 3, 4]) await click(cardEl, `button[data-action="execute_chore"][data-id="${id}"]`);
+      for (const id of ids) await click(cardEl, `button[data-action="execute_chore"][data-id="${id}"]`);
       return results.calls.slice(start).filter((x) => x.service === "execute_chore").map((x) => x.data);
     };
     c.done_default = await doneCalls({});
     c.done_track_now = await doneCalls({ track_execution_now: true });
+    // name -> whether Done tracks now. The fake Grocy only has chores 1-6.
+    const slotChores = [
+      { name: "Weekly x2, 10 days late", next_estimated_execution_time: iso(-10), period_type: "weekly", period_config: "sunday", period_interval: 2 },
+      { name: "Weekly x2, early", next_estimated_execution_time: iso(3), period_type: "weekly", period_config: "sunday", period_interval: 2 },
+      { name: "Weekly, 8 days late", next_estimated_execution_time: iso(-8), period_type: "weekly", period_config: "sunday", period_interval: 1 },
+      { name: "Monthly x3, 40 days late", next_estimated_execution_time: iso(-40), period_type: "monthly", period_interval: 3 },
+      { name: "Monthly, 40 days late", next_estimated_execution_time: iso(-40), period_type: "monthly", period_interval: 1 },
+      { name: "Yearly x2, early", next_estimated_execution_time: iso(30), period_type: "yearly", period_interval: 2 },
+      { name: "Yearly, 400 days late", next_estimated_execution_time: iso(-400), period_type: "yearly", period_interval: 1 },
+      { name: "Hourly", next_estimated_execution_time: iso(-1), period_type: "hourly", period_interval: 6 },
+      { name: "No details", next_estimated_execution_time: iso(-1), period_type: null, period_interval: 0 },
+      { name: "Weekly, no interval", next_estimated_execution_time: iso(-8), period_type: "weekly", period_interval: null },
+      { name: "Weekly, interval as text", next_estimated_execution_time: iso(-8), period_type: "weekly", period_interval: "2" },
+      { name: "Manual", next_estimated_execution_time: null, period_type: "manually" },
+    ];
+    c.done_slots = {};
+    for (let i = 0; i < slotChores.length; i += 6) {
+      const chunk = slotChores.slice(i, i + 6).map((chore, k) => ({ id: k + 1, ...chore }));
+      const slots = JSON.parse(JSON.stringify(STATES));
+      slots["sensor.grocy_chores"].attributes.chores = chunk;
+      const sent = await doneCalls({ track_execution_now: true }, slots, chunk.map((chore) => chore.id));
+      chunk.forEach((chore, k) => { c.done_slots[chore.name] = sent[k] ? sent[k].track_execution_now === true : null; });
+    }
   } catch (err) {
     results.errors.push(`harness: ${err && err.stack ? err.stack : err}`);
   }
