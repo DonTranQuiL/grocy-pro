@@ -178,10 +178,25 @@ async def test_card_in_browser(
     assert checks["done_default"] == [{"chore_id": i} for i in (1, 2, 3, 4)]
     assert checks["done_track_now"] == [
         {"chore_id": 1},
-        {"chore_id": 2, "track_execution_now": True},
+        {"chore_id": 2},
         {"chore_id": 3, "track_execution_now": True},
         {"chore_id": 4},
     ]
+    # Calendar chores keep their slot unless Done is a whole period late.
+    assert checks["done_slots"] == {
+        "Weekly x2, 10 days late": False,
+        "Weekly x2, early": False,
+        "Weekly, 8 days late": True,
+        "Monthly x3, 40 days late": False,
+        "Monthly, 40 days late": True,
+        "Yearly x2, early": False,
+        "Yearly, 400 days late": True,
+        "Hourly": True,
+        "No details": True,
+        "Weekly, no interval": True,
+        "Weekly, interval as text": False,
+        "Manual": True,
+    }
 
     # Every payload the card sent is accepted by the real action schemas and
     # reaches Grocy.

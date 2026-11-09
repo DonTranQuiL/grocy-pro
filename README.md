@@ -68,10 +68,10 @@ show_pictures: true       # product pictures from Grocy
 show_log: true            # short log of the actions you took, with errors
 confirm_delete: true      # ask before the bin icon deletes a task or chore in Grocy
 due_within_days: 1        # only overdue chores and chores due within 1 day (default: all chores)
-track_execution_now: false # Done on a late interval chore counts from today (see below)
+track_execution_now: false # Done on a late daily or hourly chore counts from today (see below)
 ```
 
-With `track_execution_now: true`, Done keeps the scheduled slot for chores that repeat every week, month or year (interval 1), and tracks every other chore (for example "every 2 weeks" or "every 3 days") at the moment you press Done, so a late Done counts from today. Without it, Done always tracks at the scheduled time, as before.
+With `track_execution_now: true`, Done tracks daily, hourly and adaptive chores (for example "every 3 days") at the moment you press Done, so a late Done counts from today. Weekly, monthly and yearly chores keep their scheduled slot for every interval, because Grocy puts their next date on a weekday, a day of the month or a day of the year: "every 2 weeks on Sunday" stays on the same Sundays when you press Done early or a few days late. Only when Done is a whole period late (for example 8 days for a weekly chore) does the card track it now, because the slot would give a next date that has already passed. Without the option, Done always tracks at the scheduled time, as before.
 
 `title`, `entity_prefix`, `due_within_days` and the switches can also be set in the visual editor. The card follows your Home Assistant theme (light or dark), switches to one column on narrow screens and works in Sections, Masonry and Panel views. An item disappears right after you tap it; the integration refreshes its data straight after every action.
 
